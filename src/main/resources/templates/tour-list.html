@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Все туры</title>
+    <link href="../static/css/style.css" th:href="@{/css/style.css}" rel="stylesheet" />
+</head>
+<body>
+<div class="container">
+    <h1>Все туры</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Наименование отеля</th>
+            <th>Цена на тур</th>
+            <th>Изменение цены</th>
+            <th>Ссылка на тур</th>
+            <th>Подробнее о туре</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="tour : ${tours}">
+            <td th:text="${tour.id}"></td>
+            <td th:text="${tour.hotelName}"></td>
+            <td th:text="${tour.currentPrice}"></td>
+            <td th:text="${tour.priceChange}"></td>
+            <td><a th:href="${tour.link.link}" target="_blank">ссылка на тур</a></td>
+            <td><a th:href="@{/tour/{id}(id=${tour.id})}">Подробнее о туре</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+
+
+
+</body>
+</html>

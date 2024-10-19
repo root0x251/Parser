@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Link and Selector</title>
+    <script>
+        function toggleFields() {
+            const select = document.getElementById('existingWhichSite');
+            const hotelNameSelector = document.getElementById('hotelNameSelector');
+            const priceSelector = document.getElementById('priceSelector');
+
+            // Если выбрано существующее значение, отключаем поля
+            if (select.value) {
+                hotelNameSelector.disabled = true;
+                priceSelector.disabled = true;
+            } else {
+                hotelNameSelector.disabled = false;
+                priceSelector.disabled = false;
+            }
+        }
+    </script>
+</head>
+<body>
+
+<h1>Add New Link and Selector</h1>
+
+<form th:action="@{/addLinkSelector}" th:object="${form}" method="post">
+    <div>
+        <label for="url">URL:</label>
+        <input type="text" id="url" th:field="*{url}" required/>
+    </div>
+
+    <div>
+        <label for="existingWhichSite">Select Which Site (optional):</label>
+        <select id="existingWhichSite" th:field="*{existingWhichSiteId}" onchange="toggleFields()">
+            <option value="">--- Select from existing ---</option>
+            <option th:each="selector : ${selectors}" th:value="${selector.id}"
+                    th:text="${selector.whichSite}"></option>
+        </select>
+    </div>
+
+    <div>
+        <label for="whichSite">Which Site (if adding new):</label>
+        <input type="text" id="whichSite" th:field="*{whichSite}"/>
+    </div>
+
+    <div>
+        <label for="hotelNameSelector">Hotel Name Selector:</label>
+        <input type="text" id="hotelNameSelector" th:field="*{hotelNameSelector}" required/>
+    </div>
+
+    <div>
+        <label for="priceSelector">Price Selector:</label>
+        <input type="text" id="priceSelector" th:field="*{priceSelector}" required/>
+    </div>
+
+    <div>
+        <button type="submit">Add Link and Selector</button>
+    </div>
+</form>
+
+</body>
+</html>
