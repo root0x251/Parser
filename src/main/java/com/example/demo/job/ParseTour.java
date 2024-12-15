@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -45,7 +46,7 @@ public class ParseTour {
         this.logErrorRepo = logErrorRepo;
     }
 
-    @Scheduled(fixedDelay = 100_000)
+    @Scheduled(fixedDelay = 2_800_000)
     public void initParse() {
         isParserRunning.set(true);
 
@@ -117,9 +118,10 @@ public class ParseTour {
             if (currentPriceFromDB != priceInt) {
                 // Добавляем запись в историю изменений цены
                 LocalDateTime now = LocalDateTime.now();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
 
                 // Добавляем запись в историю изменений цены
-                TourPriceHistoryEntity priceHistory = new TourPriceHistoryEntity(now, currentPriceFromDB, existingTour);
+                TourPriceHistoryEntity priceHistory = new TourPriceHistoryEntity(now.format(formatter), currentPriceFromDB, existingTour);
 
                 tourPriseHistoryRepository.save(priceHistory);
 
@@ -156,7 +158,9 @@ public class ParseTour {
 
     private void webDriverQuit(WebDriver webDriver, String error) {
         System.out.println(error);
-        if (webDriver != null) webDriver.quit();
+        if (webDriver != null) {
+            webDriver.quit();
+        }
     }
 
     private void errorLog(String errorCode) {

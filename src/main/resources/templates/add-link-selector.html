@@ -1,63 +1,72 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Add Link and Selector</title>
-    <script>
-        function toggleFields() {
-            const select = document.getElementById('existingWhichSite');
-            const hotelNameSelector = document.getElementById('hotelNameSelector');
-            const priceSelector = document.getElementById('priceSelector');
 
-            // Если выбрано существующее значение, отключаем поля
-            if (select.value) {
-                hotelNameSelector.disabled = true;
-                priceSelector.disabled = true;
-            } else {
-                hotelNameSelector.disabled = false;
-                priceSelector.disabled = false;
-            }
+
+<div th:replace="~{fragments/header}"></div>
+
+
+<div class="container mt-4">
+    <h1 class="text-center">Add a New Tour</h1>
+    <form class="mt-4 bg-secondary p-4 rounded" th:action="@{/addLinkSelector}" th:object="${form}" method="post">
+        <div class="mb-3">
+            <label for="url" class="form-label">Tour Link</label>
+            <input type="url" class="form-control" id="url" placeholder="Enter the URL of the tour" th:field="*{url}" required/>
+        </div>
+        <div class="mb-3">
+            <label for="existingWhichSite" class="form-label">Select Which Site (optional):</label>
+            <select class="form-select" id="existingWhichSite" th:field="*{existingWhichSiteId}" onchange="toggleFields()">
+                <option value="">--- Select from existing ---</option>
+                <option th:each="selector : ${selectors}" th:value="${selector.id}" th:text="${selector.whichSite}"></option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="whichSite" class="form-label">Which Site (if adding new):</label>
+            <input type="text" id="whichSite" th:field="*{whichSite}" class="form-control" placeholder="For example fun/biblio"/>
+        </div>
+
+        <div class="mb-3">
+            <label for="hotelNameSelector" class="form-label">Hotel Name Selector</label>
+            <input type="text" class="form-control" id="hotelNameSelector" th:field="*{hotelNameSelector}" placeholder="For example: #app > div > ****" required/>
+        </div>
+
+        <div class="mb-3">
+            <label for="priceSelector" class="form-label">Price Selector</label>
+            <input type="text" class="form-control" id="priceSelector" th:field="*{priceSelector}" placeholder="For example: #app > div > ****" required/>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Tour</button>
+    </form>
+</div>
+
+
+<div th:replace="~{fragments/footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Функция для включения/выключения полей
+    function toggleFields() {
+        const selectElement = document.getElementById('existingWhichSite');
+        const whichSiteField = document.getElementById('whichSite');
+        const hotelNameSelectorField = document.getElementById('hotelNameSelector');
+        const priceSelectorField = document.getElementById('priceSelector');
+
+        // Если выбран элемент из списка (не пустой выбор)
+        if (selectElement.value) {
+            // Сделать остальные поля недоступными
+            whichSiteField.disabled = true;
+            hotelNameSelectorField.disabled = true;
+            priceSelectorField.disabled = true;
+        } else {
+            // Если не выбран элемент, сделать поля доступными
+            whichSiteField.disabled = false;
+            hotelNameSelectorField.disabled = false;
+            priceSelectorField.disabled = false;
         }
-    </script>
-</head>
-<body>
+    }
 
-<h1>Add New Link and Selector</h1>
-
-<form th:action="@{/addLinkSelector}" th:object="${form}" method="post">
-    <div>
-        <label for="url">URL:</label>
-        <input type="text" id="url" th:field="*{url}" required/>
-    </div>
-
-    <div>
-        <label for="existingWhichSite">Select Which Site (optional):</label>
-        <select id="existingWhichSite" th:field="*{existingWhichSiteId}" onchange="toggleFields()">
-            <option value="">--- Select from existing ---</option>
-            <option th:each="selector : ${selectors}" th:value="${selector.id}"
-                    th:text="${selector.whichSite}"></option>
-        </select>
-    </div>
-
-    <div>
-        <label for="whichSite">Which Site (if adding new):</label>
-        <input type="text" id="whichSite" th:field="*{whichSite}"/>
-    </div>
-
-    <div>
-        <label for="hotelNameSelector">Hotel Name Selector:</label>
-        <input type="text" id="hotelNameSelector" th:field="*{hotelNameSelector}" required/>
-    </div>
-
-    <div>
-        <label for="priceSelector">Price Selector:</label>
-        <input type="text" id="priceSelector" th:field="*{priceSelector}" required/>
-    </div>
-
-    <div>
-        <button type="submit">Add Link and Selector</button>
-    </div>
-</form>
-
+    // Вызовем функцию, чтобы правильно установить начальное состояние (когда ничего не выбрано)
+    toggleFields();
+</script>
 </body>
 </html>

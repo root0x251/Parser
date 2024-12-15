@@ -18,7 +18,7 @@ public class TourPriceHistoryEntity {
     private Long id;
 
     @Column(name = "date", nullable = false)
-    private LocalDateTime date;
+    private String date;
 
     @Column(name = "old_price" ,nullable = false)
     private int oldPrice;
@@ -28,7 +28,7 @@ public class TourPriceHistoryEntity {
     @JsonIgnore
     private TourEntity tourEntity;
 
-    public TourPriceHistoryEntity(LocalDateTime date, int oldPrice, TourEntity tourEntity) {
+    public TourPriceHistoryEntity(String date, int oldPrice, TourEntity tourEntity) {
         this.date = date;
         this.oldPrice = oldPrice;
         this.tourEntity = tourEntity;
