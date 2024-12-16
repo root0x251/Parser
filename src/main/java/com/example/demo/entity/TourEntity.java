@@ -50,4 +50,15 @@ public class TourEntity {
                 ", \npriceHistory=" + priceHistory +
                 '}' + "\n";
     }
+
+    public String getPriceColor() {
+        if (priceChange.equals("цена увеличилась")) {
+            return "#ED1C24"; // увеличение цены
+        } else if (priceChange.equals("цена уменьшилась")) {
+            return "#007365"; // уменьшение цены
+        } else {
+            return "#7496a9"; // дефолт
+        }
+    }
+
 }

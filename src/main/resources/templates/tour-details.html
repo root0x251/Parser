@@ -19,13 +19,13 @@
         </div>
         <div class="col-md-6">
             <div class="bg-secondary p-3 rounded">
-                <h5>${tour.hotelName}</h5>
+                <h5 th:text="${tour.hotelName}"></h5>
                 <p>Here you can find a detailed description of the tour, including amenities, activities, and the
                     surrounding area. This is the perfect getaway for those seeking both relaxation and adventure.</p>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item bg-secondary text-light">Location: Sunny Beach Resort</li>
-                    <li class="list-group-item bg-secondary text-light">Price: ${tour.currentPrice}</li>
-                    <li class="list-group-item bg-secondary text-light">${tour.priceChange}</li>
+                    <li class="list-group-item bg-secondary text-light" th:text="${tour.currentPrice}"></li>
+                    <li class="list-group-item bg-secondary text-light" th:text="${tour.priceChange}"></li>
                 </ul>
                 <a href="#" class="btn btn-primary mt-3">Book Now</a>
             </div>
