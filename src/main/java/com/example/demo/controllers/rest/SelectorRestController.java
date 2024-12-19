@@ -1,9 +1,9 @@
 package com.example.demo.controllers.rest;
 
-import com.example.demo.entity.LinkEntity;
-import com.example.demo.entity.SelectorEntity;
-import com.example.demo.repository.LinkRepository;
-import com.example.demo.repository.SelectorRepo;
+import com.example.demo.entity.tour.LinkEntity;
+import com.example.demo.entity.tour.SelectorEntity;
+import com.example.demo.repository.tour.LinkRepository;
+import com.example.demo.repository.tour.SelectorRepo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;

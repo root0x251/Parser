@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package com.example.demo.entity.tour;
 
 import jakarta.persistence.*;
 import lombok.Data;

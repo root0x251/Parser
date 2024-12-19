@@ -17,27 +17,21 @@
         <div th:each="tour : ${tours}" class="col-md-4">
             <div class="card bg-secondary text-light h-100">
                 <!-- Carousel for Tour -->
-                <div id="carouselTour1" class="carousel slide" data-bs-ride="carousel">
+                <div th:id="'carouselTour' + ${tour.id}" class="carousel slide" data-bs-ride="carousel">
                     <div class="carousel-inner">
-                        <div class="carousel-item active">
-                            <img src="https://via.placeholder.com/300x200" class="d-block w-100" alt="Tour Image 1-1">
-                        </div>
-                        <div class="carousel-item">
-                            <img src="https://via.placeholder.com/300x200/cccccc" class="d-block w-100"
-                                 alt="Tour Image 1-2">
-                        </div>
-                        <div class="carousel-item">
-                            <img src="https://via.placeholder.com/300x200/aaaaaa" class="d-block w-100"
-                                 alt="Tour Image 1-3">
+                        <!-- Динамически добавляем изображения для каждого тура -->
+                        <div th:each="image, iterStat : ${tour.images}" class="carousel-item"
+                             th:classappend="${iterStat.index == 0} ? ' active' : ''">
+                            <img th:src="@{${image}}" class="d-block w-100" alt="Tour Image"/>
                         </div>
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselTour1"
-                            data-bs-slide="prev">
+                    <button class="carousel-control-prev" type="button"
+                            th:data-bs-target="'#carouselTour' + ${tour.id}" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
                     </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselTour1"
-                            data-bs-slide="next">
+                    <button class="carousel-control-next" type="button"
+                            th:data-bs-target="'#carouselTour' + ${tour.id}" data-bs-slide="next">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
@@ -48,28 +42,22 @@
                         <h5 class="card-title" th:text="${tour.hotelName}"></h5>
                         <span class="badge px-2 py-1"
                               th:style="'background-color: ' + ${tour.priceColor} + '; color: white;'"
-                              th:text="${#numbers.formatDecimal(tour.currentPrice, 0, 'POINT', 0, 'POINT')} + ' ₽'">
-<!--                               th:text="${#numbers.formatInteger(tour.currentPrice, 0, 'WHITESPACE')} + ' ₽'">-->
-                            <!--                              th:text="${#numbers.formatDecimal(tour.currentPrice, 0, 'COMMA', 0, 'POINT')} + ' ₽'">-->
-                        </span>
-
-
+                              th:text="${#numbers.formatDecimal(tour.currentPrice, 0, 'POINT', 0, 'POINT')} + ' ₽'"></span>
                     </div>
                     <p class="card-text">A short description of the tour or hotel.</p>
                     <div class="d-flex justify-content-between">
                         <a th:href="@{/tour/{id}(id=${tour.id})}" class="btn btn-outline-light btn-sm">Подробнее</a>
                         <a th:href="${tour.link.link}" class="btn btn-outline-light btn-sm">Ссылка на тур</a>
-
-                        <a th:href="@{/tour/delete/{id}(id=${tour.id})}"
-                           class="btn btn-outline-danger btn-sm"
+                        <a th:href="@{/tour/delete/{id}(id=${tour.id})}" class="btn btn-outline-danger btn-sm"
                            onclick="return confirm('Вы уверены, что хотите удалить этот тур?');">Удалить</a>
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
 
 <div th:replace="~{fragments/footer}"></div>
 

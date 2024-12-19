@@ -1,27 +1,26 @@
 package com.example.demo.job;
 
-import com.example.demo.entity.LinkEntity;
-import com.example.demo.entity.TourEntity;
-import com.example.demo.entity.TourPriceHistoryEntity;
-import com.example.demo.repository.LinkRepository;
-import com.example.demo.repository.LogErrorRepo;
-import com.example.demo.repository.TourPriseHistoryRepository;
-import com.example.demo.repository.TourRepository;
+import com.example.demo.entity.tour.LinkEntity;
+import com.example.demo.entity.tour.TourEntity;
+import com.example.demo.entity.tour.TourPriceHistoryEntity;
+import com.example.demo.repository.tour.LinkRepository;
+import com.example.demo.repository.tour.LogErrorRepo;
+import com.example.demo.repository.tour.TourPriseHistoryRepository;
+import com.example.demo.repository.tour.TourRepository;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class ParseTour {
@@ -31,6 +30,7 @@ public class ParseTour {
 
     private String hotelName = "Null";
     private int priceInt = 0;
+    private List<String> images;
 
     private final LinkRepository linkRepository;
     private final TourRepository tourRepository;
@@ -46,7 +46,7 @@ public class ParseTour {
         this.logErrorRepo = logErrorRepo;
     }
 
-    @Scheduled(fixedDelay = 2_800_000)
+//    @Scheduled(fixedDelay = 2_800_000)
     public void initParse() {
         isParserRunning.set(true);
 
@@ -58,7 +58,6 @@ public class ParseTour {
             String selectorHotelName = link.getSelectorEntity().getHotelSelector();
             String selectorHotelPrice = link.getSelectorEntity().getPriceSelector();
             Long selectorID = link.getSelectorEntity().getId();
-
             try {
                 webDriver = new ChromeDriver(options);
                 sleep();
@@ -66,6 +65,7 @@ public class ParseTour {
                 sleep();
                 startParse(webDriver, selectorHotelName, selectorHotelPrice, selectorID);
                 workWithDB(link);
+                webDriverQuit(webDriver, "no error");
             } catch (SessionNotCreatedException e) {
                 errorLog("SessionNotCreatedException");
                 webDriverQuit(webDriver, "SessionNotCreatedException");
@@ -73,11 +73,8 @@ public class ParseTour {
                 errorLog("TimeoutException");
                 webDriverQuit(webDriver, "SessionNotCreatedException");
             }
-
         }
-
         webDriverQuit(webDriver, "quit");
-
         isParserRunning.set(false);
         System.out.println("======================================= EXIT ======================================");
 
@@ -85,13 +82,17 @@ public class ParseTour {
 
     private void startParse(WebDriver webDriver, String selectorHotelName, String selectorHotelPrice, Long selectorID) {
         sleep();
+
         try {
             scrollDownAndUp(webDriver);
             hotelName = webDriver.findElement(By.xpath(selectorHotelName)).getText();
             priceInt = Integer.parseInt(webDriver.findElement(By.xpath(selectorHotelPrice)).getText().replaceAll("[^\\d.]", ""));
-        } catch (InvalidSelectorException e) {
-            hotelName = webDriver.findElement(By.cssSelector(selectorHotelName)).getText();
-            priceInt = Integer.parseInt(webDriver.findElement(By.cssSelector(selectorHotelPrice)).getText().replaceAll("[^\\d.]", ""));
+
+            System.out.println(hotelName);
+            System.out.println(priceInt);
+            // add images to list
+            searchImage(webDriver);
+
         } catch (NoSuchElementException e) {
             errorLog("NoSuchElementException", selectorID);
             webDriverQuit(webDriver, "NoSuchElementException");
@@ -102,8 +103,40 @@ public class ParseTour {
             errorLog("TimeoutException", selectorID);
             webDriverQuit(webDriver, "TimeoutException");
         }
+    }
 
-        webDriverQuit(webDriver, "no error");
+    private void searchImage(WebDriver webDriver) {
+        // array with images
+        images = new ArrayList<>();
+
+        try {
+            List<WebElement> biblioImages = webDriver.findElements(By.cssSelector(".image ul li.visible a.link"));
+            List<WebElement> funsunImages = webDriver.findElements(By.cssSelector(".hotelInfoPhotos .box .main, .hotelInfoPhotos .box .photo"));
+
+            // Регулярное выражение для извлечения URL из style
+            Pattern urlPattern = Pattern.compile("url\\(\"(.*?)\"\\)");
+            // biblio
+            for (WebElement element : biblioImages) {
+                String fullImageUrl = element.getAttribute("href");
+                if (fullImageUrl != null) {
+                    images.add(fullImageUrl);
+                }
+            }
+            // funsun
+            for (WebElement element : funsunImages) {
+                String styleAttribute = element.getAttribute("style");
+                if (styleAttribute != null) {
+                    Matcher matcher = urlPattern.matcher(styleAttribute);
+                    if (matcher.find()) {
+                        String imageUrl = matcher.group(1);
+                        images.add(imageUrl);
+                    }
+                }
+            }
+        } finally {
+            System.out.println("images done");
+        }
+
     }
 
     private void workWithDB(LinkEntity linkEntity) {
@@ -129,15 +162,15 @@ public class ParseTour {
                 existingTour.setCurrentPrice(priceInt);
 
                 if (currentPriceFromDB < priceInt) {
-                    existingTour.setPriceChange("цена увеличилась");
+                    existingTour.setPriceChange("Цена увеличилась");
                 } else {
-                    existingTour.setPriceChange("цена уменьшилась");
+                    existingTour.setPriceChange("Цена уменьшилась");
                 }
                 tourRepository.save(existingTour);
             }
         } else {
             // Тур не существует — создаем новый тур
-            TourEntity tour = new TourEntity(hotelName, priceInt, "без изменений", linkEntity);
+            TourEntity tour = new TourEntity(hotelName, priceInt, "без изменений", images, linkEntity);
             // Сохранение тура в базу данных
             tourRepository.save(tour);
         }
@@ -158,6 +191,9 @@ public class ParseTour {
 
     private void webDriverQuit(WebDriver webDriver, String error) {
         System.out.println(error);
+        if (images != null && !images.isEmpty()) {
+            images.clear();
+        }
         if (webDriver != null) {
             webDriver.quit();
         }
