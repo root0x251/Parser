@@ -1,19 +1,18 @@
 package com.example.demo.job;
 
-import com.example.demo.entity.LinkEntity;
-import com.example.demo.entity.TourEntity;
-import com.example.demo.entity.TourPriceHistoryEntity;
-import com.example.demo.repository.LinkRepository;
-import com.example.demo.repository.LogErrorRepo;
-import com.example.demo.repository.TourPriseHistoryRepository;
-import com.example.demo.repository.TourRepository;
+import com.example.demo.entity.tour.LinkEntity;
+import com.example.demo.entity.tour.TourEntity;
+import com.example.demo.entity.tour.TourPriceHistoryEntity;
+import com.example.demo.repository.tour.LinkRepository;
+import com.example.demo.repository.tour.LogErrorRepo;
+import com.example.demo.repository.tour.TourPriseHistoryRepository;
+import com.example.demo.repository.tour.TourRepository;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -47,7 +46,7 @@ public class ParseTour {
         this.logErrorRepo = logErrorRepo;
     }
 
-    @Scheduled(fixedDelay = 2_800_000)
+//    @Scheduled(fixedDelay = 2_800_000)
     public void initParse() {
         isParserRunning.set(true);
 
@@ -163,9 +162,9 @@ public class ParseTour {
                 existingTour.setCurrentPrice(priceInt);
 
                 if (currentPriceFromDB < priceInt) {
-                    existingTour.setPriceChange("цена увеличилась");
+                    existingTour.setPriceChange("Цена увеличилась");
                 } else {
-                    existingTour.setPriceChange("цена уменьшилась");
+                    existingTour.setPriceChange("Цена уменьшилась");
                 }
                 tourRepository.save(existingTour);
             }

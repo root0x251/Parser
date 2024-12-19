@@ -1,21 +1,17 @@
 package com.example.demo.controllers;
 
-import com.example.demo.entity.LinkEntity;
-import com.example.demo.entity.SelectorEntity;
-import com.example.demo.entity.TourEntity;
-import com.example.demo.entity.TourPriceHistoryEntity;
-import com.example.demo.repository.LinkRepository;
-import com.example.demo.repository.SelectorRepo;
-import com.example.demo.repository.TourPriseHistoryRepository;
-import com.example.demo.repository.TourRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.demo.entity.tour.LinkEntity;
+import com.example.demo.entity.tour.SelectorEntity;
+import com.example.demo.entity.tour.TourEntity;
+import com.example.demo.entity.tour.TourPriceHistoryEntity;
+import com.example.demo.repository.tour.LinkRepository;
+import com.example.demo.repository.tour.SelectorRepo;
+import com.example.demo.repository.tour.TourPriseHistoryRepository;
+import com.example.demo.repository.tour.TourRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -48,6 +44,7 @@ public class TourViewController {
     // подробнее
     @GetMapping("/tour/{id}")
     public String getTourDetails(@PathVariable Long id, Model model) {
+
         Optional<TourEntity> optionalTour = tourRepository.findById(id);
         if (optionalTour.isEmpty()) {
             return "tour-not-found"; // шаблон с ошибкой
@@ -57,13 +54,16 @@ public class TourViewController {
         LinkEntity link = tour.getLink();
         List<TourPriceHistoryEntity> tourPriceHistory = tour.getPriceHistory();
 
+        int oldPrice = tourPriceHistory.get(tourPriceHistory.size() - 1).getOldPrice();
+        int priceDifference = tour.getCurrentPrice() - oldPrice;
+
         // Преобразуем данные из priceHistory для использования в графике
         List<String> dates = new ArrayList<>();
         List<Integer> prices = new ArrayList<>();
 
         for (TourPriceHistoryEntity history : tourPriceHistory) {
-            dates.add(history.getDate()); // Преобразуем дату в строку
-            prices.add(history.getOldPrice()); // Добавляем цену
+            dates.add(history.getDate());
+            prices.add(history.getOldPrice());
         }
 
 
@@ -79,6 +79,8 @@ public class TourViewController {
         model.addAttribute("link", link);
         model.addAttribute("priceHistoryDates", dates);
         model.addAttribute("priceHistoryPrices", prices);
+        model.addAttribute("priceDifference", priceDifference);
+        model.addAttribute("oldPrice", oldPrice);
 
         return "tour-details";
     }

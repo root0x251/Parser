@@ -24,7 +24,9 @@
                     surrounding area. This is the perfect getaway for those seeking both relaxation and adventure.</p>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item bg-secondary text-light">Location: Sunny Beach Resort</li>
-                    <li class="list-group-item bg-secondary text-light" th:text="${tour.currentPrice}"></li>
+                    <li class="list-group-item bg-secondary text-light" th:text="'Цена тура: ' + ${tour.currentPrice} + ' ₽'"></li>
+                    <li class="list-group-item bg-secondary text-light" th:text="'Старая цена: ' + ${oldPrice} + ' ₽'"></li>
+                    <li class="list-group-item bg-secondary text-light" th:text="'Разница в цене: ' + ${priceDifference} + ' ₽'">
                     <li class="list-group-item bg-secondary text-light" th:text="${tour.priceChange}"></li>
                 </ul>
                 <a href="#" class="btn btn-primary mt-3">Book Now</a>

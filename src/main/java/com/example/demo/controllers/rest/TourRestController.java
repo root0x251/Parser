@@ -1,13 +1,13 @@
 package com.example.demo.controllers.rest;
 
-import com.example.demo.entity.LinkEntity;
-import com.example.demo.entity.SelectorEntity;
-import com.example.demo.entity.TourEntity;
-import com.example.demo.entity.TourPriceHistoryEntity;
-import com.example.demo.repository.LinkRepository;
-import com.example.demo.repository.SelectorRepo;
-import com.example.demo.repository.TourPriseHistoryRepository;
-import com.example.demo.repository.TourRepository;
+import com.example.demo.entity.tour.LinkEntity;
+import com.example.demo.entity.tour.SelectorEntity;
+import com.example.demo.entity.tour.TourEntity;
+import com.example.demo.entity.tour.TourPriceHistoryEntity;
+import com.example.demo.repository.tour.LinkRepository;
+import com.example.demo.repository.tour.SelectorRepo;
+import com.example.demo.repository.tour.TourPriseHistoryRepository;
+import com.example.demo.repository.tour.TourRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
