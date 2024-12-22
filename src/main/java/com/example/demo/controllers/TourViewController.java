@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
+@RequestMapping({"/", "/tours"})
 public class TourViewController {
 
     private final TourRepository tourRepository;
@@ -35,7 +37,7 @@ public class TourViewController {
     }
 
     // all tours
-    @GetMapping("/tours")
+    @GetMapping
     public String listAllTours(Model model) {
         model.addAttribute("tours", tourRepository.findAll());
         return "tour-list";
@@ -54,8 +56,12 @@ public class TourViewController {
         LinkEntity link = tour.getLink();
         List<TourPriceHistoryEntity> tourPriceHistory = tour.getPriceHistory();
 
-        int oldPrice = tourPriceHistory.get(tourPriceHistory.size() - 1).getOldPrice();
-        int priceDifference = tour.getCurrentPrice() - oldPrice;
+        int oldPrice = 0;
+        int priceDifference = 0;
+        if (!tourPriceHistory.isEmpty()) {
+            oldPrice = tourPriceHistory.get(tourPriceHistory.size() - 1).getOldPrice();
+            priceDifference = tour.getCurrentPrice() - oldPrice;
+        }
 
         // Преобразуем данные из priceHistory для использования в графике
         List<String> dates = new ArrayList<>();
@@ -65,7 +71,6 @@ public class TourViewController {
             dates.add(history.getDate());
             prices.add(history.getOldPrice());
         }
-
 
         // Добавление последней цены
         LocalDateTime now = LocalDateTime.now();

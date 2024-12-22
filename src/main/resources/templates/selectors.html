@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="bg-dark text-light">
+
+<div th:replace="~{fragments/nav}"></div>
+
+<div class="container mt-4">
+    <h1 class="text-center mb-4 text-light">All Selectors</h1>
+    <div class="row mt-4 gy-4">
+        <!-- Пример карточки для каждого селектора -->
+        <div th:each="selector : ${selectors}" class="col-md-4">
+            <div class="card shadow-sm" style="background-color: #6C757D; color: white; height: 100%;">
+                <!-- Заголовок карточки -->
+                <div class="card-header text-center bg-dark text-white">
+                    <h5 class="card-title" th:text="${selector.whichSite}">Site Name</h5>
+                </div>
+
+                <!-- Основное тело карточки -->
+                <div class="card-body">
+                    <!-- Блок с селекторами -->
+                    <h6 class="card-subtitle mb-3 text-muted">Selectors</h6>
+                    <ul class="list-group">
+                        <li class="list-group-item" style="background-color: #495057; color: white;"><strong>Hotel
+                            Selector:</strong> <span th:text="${selector.hotelSelector}">Selector 1</span></li>
+                        <li class="list-group-item" style="background-color: #495057; color: white;"><strong>Price
+                            Selector:</strong> <span th:text="${selector.priceSelector}">Selector 2</span></li>
+                    </ul>
+
+                    <!-- Кнопка изменения -->
+                    <div class="d-flex justify-content-center mt-4">
+                        <a th:href="@{/selector/edit/{id}(id=${selector.id})}" class="btn btn-outline-light btn-sm">
+                            Изменить </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div th:replace="~{fragments/footer}"></div>
+
+</body>
+</html>

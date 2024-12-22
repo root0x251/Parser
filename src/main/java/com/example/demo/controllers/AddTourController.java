@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import java.util.List;
 
 @Controller
-public class LinkSelectorController {
+public class AddTourController {
     private final SelectorRepo selectorRepository;
     private final LinkRepository linkRepository;
 
-    public LinkSelectorController(SelectorRepo selectorRepository, LinkRepository linkRepository) {
+    public AddTourController(SelectorRepo selectorRepository, LinkRepository linkRepository) {
         this.selectorRepository = selectorRepository;
         this.linkRepository = linkRepository;
     }
@@ -43,6 +43,11 @@ public class LinkSelectorController {
     @PostMapping("/addLinkSelector")
     public String handleAddLinkSelectorForm(@ModelAttribute LinkSelectorForm form) {
         SelectorEntity selector;
+
+        // Проверка на существование одинаковых ссылок
+        if (linkRepository.existsByLink(form.getUrl())) {
+            return "redirect:/addLinkSelector";
+        }
 
         // Проверяем, был ли выбран существующий whichSite из выпадающего меню или введено новое значение
         if (form.getExistingWhichSiteId() != null) {

@@ -13,6 +13,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -46,7 +47,7 @@ public class ParseTour {
         this.logErrorRepo = logErrorRepo;
     }
 
-//    @Scheduled(fixedDelay = 2_800_000)
+    @Scheduled(fixedDelay = 2_800_000)
     public void initParse() {
         isParserRunning.set(true);
 
@@ -60,12 +61,16 @@ public class ParseTour {
             Long selectorID = link.getSelectorEntity().getId();
             try {
                 webDriver = new ChromeDriver(options);
-                sleep();
+//                sleep();
                 webDriver.get(link.getLink());
                 sleep();
                 startParse(webDriver, selectorHotelName, selectorHotelPrice, selectorID);
-                workWithDB(link);
-                webDriverQuit(webDriver, "no error");
+                if (priceInt < 150000) {
+                    webDriverQuit(webDriver, "low price");
+                } else {
+                    workWithDB(link);
+                    webDriverQuit(webDriver, "no error");
+                }
             } catch (SessionNotCreatedException e) {
                 errorLog("SessionNotCreatedException");
                 webDriverQuit(webDriver, "SessionNotCreatedException");
@@ -134,7 +139,9 @@ public class ParseTour {
                 }
             }
         } finally {
-            System.out.println("images done");
+            if (images.isEmpty()) {
+                images.add("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZZV4k1vp1lymw9Q7x5a53uyW-quMhSZymZQ&s");
+            }
         }
 
     }
@@ -228,11 +235,10 @@ public class ParseTour {
         options.addArguments("--disable-dev-shm-usage");   // Отключаем /dev/shm для сервера
         options.addArguments("--window-size=1920,1080");   // Устанавливаем размер окна браузера
         options.addArguments("--disable-blink-features=AutomationControlled"); // Отключаем обнаружение Selenium
-        options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
+        options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
         // Меняем User-Agent на стандартный пользовательский
-        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.668.70 Safari/537.36");
-
+        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.116 Safari/537.36");
         // Отключение автоматической идентификации Selenium через переменные
         Map<String, Object> prefs = new HashMap<>();
         prefs.put("credentials_enable_service", false);

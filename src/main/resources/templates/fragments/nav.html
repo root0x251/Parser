@@ -1,12 +1,4 @@
-<div th:fragment="header">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Tour Details</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="styles.css">
-    </head>
-    <body class="bg-dark text-light">
+<div th:fragment="nav">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="/tours">Tour parser</a>
@@ -18,6 +10,12 @@
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="/tours">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/selector">Селекторы</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/link">Ссылки</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/addLinkSelector">add</a>
