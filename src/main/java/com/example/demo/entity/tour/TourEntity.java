@@ -56,9 +56,9 @@ public class TourEntity {
     }
 
     public String getPriceColor() {
-        if (priceChange.equals("цена увеличилась")) {
+        if (priceChange.equalsIgnoreCase("Цена увеличилась")) {
             return "#ED1C24";
-        } else if (priceChange.equals("цена уменьшилась")) {
+        } else if (priceChange.equalsIgnoreCase("Цена уменьшилась")) {
             return "#007365";
         } else {
             return "#7496a9"; // дефолт

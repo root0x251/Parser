@@ -1,6 +1,7 @@
 package com.example.demo.job;
 
 import com.example.demo.entity.tour.LinkEntity;
+import com.example.demo.entity.tour.LogErrorEntity;
 import com.example.demo.entity.tour.TourEntity;
 import com.example.demo.entity.tour.TourPriceHistoryEntity;
 import com.example.demo.repository.tour.LinkRepository;
@@ -26,8 +27,15 @@ import java.util.regex.Pattern;
 @Component
 public class ParseTour {
 
+    private final ChromeOptions options = getChromeOptions();
+
     // проверка, запущен ли парсер (нужен будет в будущем)
     public static AtomicBoolean isParserRunning = new AtomicBoolean(false);
+
+    private static final int MIN_PRICE_THRESHOLD = 150000;
+    private static final int MIN_SLEEP_MS = 8000;
+    private static final int MAX_SLEEP_MS = 13000;
+
 
     private String hotelName = "Null";
     private int priceInt = 0;
@@ -52,61 +60,47 @@ public class ParseTour {
         isParserRunning.set(true);
 
         WebDriverManager.chromedriver().setup();
-        WebDriver webDriver = null;
-        ChromeOptions options = getChromeOptions();
 
         for (LinkEntity link : linkRepository.findAll()) {
-            String selectorHotelName = link.getSelectorEntity().getHotelSelector();
-            String selectorHotelPrice = link.getSelectorEntity().getPriceSelector();
-            Long selectorID = link.getSelectorEntity().getId();
+            WebDriver webDriver = null;
+            System.out.println("======== New parser ========");
             try {
                 webDriver = new ChromeDriver(options);
-//                sleep();
                 webDriver.get(link.getLink());
-                sleep();
-                startParse(webDriver, selectorHotelName, selectorHotelPrice, selectorID);
-                if (priceInt < 150000) {
-                    webDriverQuit(webDriver, "low price");
+
+                startParse(webDriver, link.getSelectorEntity().getHotelSelector(), link.getSelectorEntity().getPriceSelector(), link.getLink());
+
+                if (priceInt < MIN_PRICE_THRESHOLD) {
+                    errorLog("Low Price", hotelName, link.getLink());
                 } else {
                     workWithDB(link);
-                    webDriverQuit(webDriver, "no error");
                 }
-            } catch (SessionNotCreatedException e) {
-                errorLog("SessionNotCreatedException");
-                webDriverQuit(webDriver, "SessionNotCreatedException");
-            } catch (TimeoutException e) {
-                errorLog("TimeoutException");
-                webDriverQuit(webDriver, "SessionNotCreatedException");
+            } catch (Exception e) {
+                errorLog(e.getMessage());
+            } finally {
+                if (webDriver != null) {
+                    webDriverQuit(webDriver);
+                }
             }
         }
-        webDriverQuit(webDriver, "quit");
+        System.out.println("======== End parser ========");
         isParserRunning.set(false);
-        System.out.println("======================================= EXIT ======================================");
-
     }
 
-    private void startParse(WebDriver webDriver, String selectorHotelName, String selectorHotelPrice, Long selectorID) {
-        sleep();
+    private void startParse(WebDriver webDriver, String selectorHotelName, String selectorHotelPrice, String tourLink) {
+        sleep(webDriver);
 
         try {
             scrollDownAndUp(webDriver);
             hotelName = webDriver.findElement(By.xpath(selectorHotelName)).getText();
             priceInt = Integer.parseInt(webDriver.findElement(By.xpath(selectorHotelPrice)).getText().replaceAll("[^\\d.]", ""));
 
-            System.out.println(hotelName);
-            System.out.println(priceInt);
             // add images to list
             searchImage(webDriver);
 
-        } catch (NoSuchElementException e) {
-            errorLog("NoSuchElementException", selectorID);
-            webDriverQuit(webDriver, "NoSuchElementException");
-        } catch (NumberFormatException exception) {
-            errorLog("NumberFormatException", selectorID);
-            webDriverQuit(webDriver, "NumberFormatException");
-        } catch (TimeoutException exception) {
-            errorLog("TimeoutException", selectorID);
-            webDriverQuit(webDriver, "TimeoutException");
+        } catch (NoSuchElementException | NumberFormatException | TimeoutException e) {
+            errorLog(e.getClass().getSimpleName(), selectorHotelName, tourLink);
+            webDriverQuit(webDriver);
         }
     }
 
@@ -151,37 +145,39 @@ public class ParseTour {
         Optional<TourEntity> existingTourOptional = tourRepository.findByLink(linkEntity);
 
         if (existingTourOptional.isPresent()) {
-            // Если тур существует, проверяем изменение цены
-            TourEntity existingTour = existingTourOptional.get();
-            int currentPriceFromDB = existingTour.getCurrentPrice();
-
-            if (currentPriceFromDB != priceInt) {
-                // Добавляем запись в историю изменений цены
-                LocalDateTime now = LocalDateTime.now();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
-
-                // Добавляем запись в историю изменений цены
-                TourPriceHistoryEntity priceHistory = new TourPriceHistoryEntity(now.format(formatter), currentPriceFromDB, existingTour);
-
-                tourPriseHistoryRepository.save(priceHistory);
-
-                // Обновляем текущую цену в туре
-                existingTour.setCurrentPrice(priceInt);
-
-                if (currentPriceFromDB < priceInt) {
-                    existingTour.setPriceChange("Цена увеличилась");
-                } else {
-                    existingTour.setPriceChange("Цена уменьшилась");
-                }
-                tourRepository.save(existingTour);
-            }
+            // Если тур существует, обновляем его данные
+            updateExistingTour(existingTourOptional.get());
         } else {
-            // Тур не существует — создаем новый тур
-            TourEntity tour = new TourEntity(hotelName, priceInt, "без изменений", images, linkEntity);
-            // Сохранение тура в базу данных
-            tourRepository.save(tour);
+            // Если тур не существует, создаем новый
+            createNewTour(linkEntity);
         }
     }
+
+    private void updateExistingTour(TourEntity existingTour) {
+        int currentPriceFromDB = existingTour.getCurrentPrice();
+
+        if (currentPriceFromDB != priceInt) {
+            // Добавляем запись в историю изменений цены
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
+
+            TourPriceHistoryEntity priceHistory = new TourPriceHistoryEntity(now.format(formatter), currentPriceFromDB, existingTour);
+            tourPriseHistoryRepository.save(priceHistory);
+
+            // Обновляем текущую цену в туре
+            existingTour.setCurrentPrice(priceInt);
+            existingTour.setPriceChange(currentPriceFromDB < priceInt ? "Цена увеличилась" : "Цена уменьшилась");
+
+            tourRepository.save(existingTour);
+        }
+    }
+
+    private void createNewTour(LinkEntity linkEntity) {
+        TourEntity tour = new TourEntity(hotelName, priceInt, "Без изменений", images, linkEntity);
+        // Сохранение тура в базу данных
+        tourRepository.save(tour);
+    }
+
 
     public void scrollDownAndUp(WebDriver driver) {
         JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -190,14 +186,13 @@ public class ParseTour {
         js.executeScript("window.scrollBy(0, 500)");
 
         // Небольшая пауза для видимости эффекта
-        sleep();
+        sleep(driver);
 
         // Прокрутка обратно вверх на 500 пикселей
         js.executeScript("window.scrollBy(0, -500)");
     }
 
-    private void webDriverQuit(WebDriver webDriver, String error) {
-        System.out.println(error);
+    private void webDriverQuit(WebDriver webDriver) {
         if (images != null && !images.isEmpty()) {
             images.clear();
         }
@@ -210,18 +205,20 @@ public class ParseTour {
         System.out.println(errorCode);
     }
 
-    private void errorLog(String errorCode, Long selectorID) {
-        System.out.println("Selector ID = " + selectorID);
-        System.out.println(errorCode);
+    private void errorLog(String errorCode, String hotelName, String tourLink) {
+        if (!logErrorRepo.existsByDate(currentDate())) {
+            LogErrorEntity logErrorEntity = new LogErrorEntity(errorCode, currentDate(), hotelName, tourLink);
+            logErrorRepo.save(logErrorEntity);
+        }
     }
 
-    private void sleep() {
-        int rand = new Random().nextInt(5000) + 8000;
-        System.out.println("=========== sleep " + rand / 1000 + " sec ===========");
+    private void sleep(WebDriver webDriver) {
+        int rand = new Random().nextInt(MIN_SLEEP_MS) + MAX_SLEEP_MS;
         try {
             Thread.sleep(rand);
         } catch (InterruptedException e) {
             errorLog("Thread sleep exception");
+            webDriverQuit(webDriver);
         }
     }
 
@@ -250,6 +247,12 @@ public class ParseTour {
         options.setExperimentalOption("useAutomationExtension", false);
 
         return options;
+    }
+
+    private String currentDate() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
+        return now.format(formatter);
     }
 
 }

@@ -17,10 +17,13 @@ public class LogErrorEntity {
     private String date;
     @Column(name = "tour_name")
     private String tourName;
+    @Column(name = "tour_link")
+    private String tourLink;
 
-    public LogErrorEntity(String description, String date, String tourName) {
+    public LogErrorEntity(String description, String date, String tourName, String tourLink) {
         this.description = description;
         this.date = date;
         this.tourName = tourName;
+        this.tourLink = tourLink;
     }
 }
