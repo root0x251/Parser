@@ -1,13 +1,7 @@
 package com.example.demo.job;
 
-import com.example.demo.entity.tour.LinkEntity;
-import com.example.demo.entity.tour.LogErrorEntity;
-import com.example.demo.entity.tour.TourEntity;
-import com.example.demo.entity.tour.TourPriceHistoryEntity;
-import com.example.demo.repository.tour.LinkRepository;
-import com.example.demo.repository.tour.LogErrorRepo;
-import com.example.demo.repository.tour.TourPriseHistoryRepository;
-import com.example.demo.repository.tour.TourRepository;
+import com.example.demo.entity.tour.*;
+import com.example.demo.repository.tour.*;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.*;
@@ -32,14 +26,19 @@ public class ParseTour {
     // проверка, запущен ли парсер (нужен будет в будущем)
     public static AtomicBoolean isParserRunning = new AtomicBoolean(false);
 
+    // константы для минимальной цены и таймера
     private static final int MIN_PRICE_THRESHOLD = 150000;
     private static final int MIN_SLEEP_MS = 8000;
     private static final int MAX_SLEEP_MS = 13000;
 
-
+    // Инфо по туру
     private String hotelName = "Null";
     private int priceInt = 0;
     private List<String> images;
+
+    // информация для ParsingInfo, сбор метрик
+    private long errorCounter = 0;
+    private long passesCounter = 0;
 
     private final LinkRepository linkRepository;
     private final TourRepository tourRepository;
@@ -47,21 +46,26 @@ public class ParseTour {
 
     private final LogErrorRepo logErrorRepo;
 
+    private final ParserInfoRepository parserInfoRepository;
+
     @Autowired
-    public ParseTour(LinkRepository linkRepository, TourRepository tourRepository, TourPriseHistoryRepository tourPriseHistoryRepository, LogErrorRepo logErrorRepo) {
+    public ParseTour(LinkRepository linkRepository, TourRepository tourRepository, TourPriseHistoryRepository tourPriseHistoryRepository, LogErrorRepo logErrorRepo, ParserInfoRepository parserInfoRepository) {
         this.linkRepository = linkRepository;
         this.tourRepository = tourRepository;
         this.tourPriseHistoryRepository = tourPriseHistoryRepository;
         this.logErrorRepo = logErrorRepo;
+        this.parserInfoRepository = parserInfoRepository;
     }
 
     @Scheduled(fixedDelay = 2_800_000)
     public void initParse() {
+        String startParsingTime = currentDate();
         isParserRunning.set(true);
 
         WebDriverManager.chromedriver().setup();
 
         for (LinkEntity link : linkRepository.findAll()) {
+            passesCounter++;
             WebDriver webDriver = null;
             System.out.println("======== New parser ========");
             try {
@@ -76,13 +80,17 @@ public class ParseTour {
                     workWithDB(link);
                 }
             } catch (Exception e) {
-                errorLog(e.getMessage());
+                errorLog(e.getClass().getSimpleName() + "\n ==== Start parsing ====");
             } finally {
                 if (webDriver != null) {
                     webDriverQuit(webDriver);
                 }
             }
         }
+        parserInfoRepository.save(new ParserInfoEntity(startParsingTime ,currentDate(), passesCounter, errorCounter));
+        passesCounter = 0;
+        errorCounter = 0;
+
         System.out.println("======== End parser ========");
         isParserRunning.set(false);
     }
@@ -184,10 +192,8 @@ public class ParseTour {
 
         // Прокрутка вниз на 500 пикселей
         js.executeScript("window.scrollBy(0, 500)");
-
         // Небольшая пауза для видимости эффекта
         sleep(driver);
-
         // Прокрутка обратно вверх на 500 пикселей
         js.executeScript("window.scrollBy(0, -500)");
     }
@@ -202,10 +208,15 @@ public class ParseTour {
     }
 
     private void errorLog(String errorCode) {
-        System.out.println(errorCode);
+        errorCounter++;
+        if (!logErrorRepo.existsByDate(currentDate())) {
+            LogErrorEntity logErrorEntity = new LogErrorEntity(errorCode, currentDate());
+            logErrorRepo.save(logErrorEntity);
+        }
     }
 
     private void errorLog(String errorCode, String hotelName, String tourLink) {
+        errorCounter++;
         if (!logErrorRepo.existsByDate(currentDate())) {
             LogErrorEntity logErrorEntity = new LogErrorEntity(errorCode, currentDate(), hotelName, tourLink);
             logErrorRepo.save(logErrorEntity);
@@ -217,7 +228,7 @@ public class ParseTour {
         try {
             Thread.sleep(rand);
         } catch (InterruptedException e) {
-            errorLog("Thread sleep exception");
+            errorLog(e.getClass().getSimpleName() + "\n===== Timer =====");
             webDriverQuit(webDriver);
         }
     }

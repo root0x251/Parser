@@ -20,6 +20,11 @@ public class LogErrorEntity {
     @Column(name = "tour_link")
     private String tourLink;
 
+    public LogErrorEntity(String description, String date) {
+        this.description = description;
+        this.date = date;
+    }
+
     public LogErrorEntity(String description, String date, String tourName, String tourLink) {
         this.description = description;
         this.date = date;

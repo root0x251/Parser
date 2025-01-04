@@ -1,19 +1,14 @@
 package com.example.demo.controllers;
 
-import com.example.demo.entity.tour.LinkEntity;
-import com.example.demo.entity.tour.SelectorEntity;
-import com.example.demo.entity.tour.TourEntity;
-import com.example.demo.entity.tour.TourPriceHistoryEntity;
-import com.example.demo.repository.tour.LinkRepository;
-import com.example.demo.repository.tour.SelectorRepo;
-import com.example.demo.repository.tour.TourPriseHistoryRepository;
-import com.example.demo.repository.tour.TourRepository;
+import com.example.demo.entity.tour.*;
+import com.example.demo.repository.tour.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -28,17 +23,47 @@ public class TourViewController {
     private final TourPriseHistoryRepository tourPriseHistoryRepository;
     private final LinkRepository linkRepository;
     private final SelectorRepo selectorRepository;
+    private final ParserInfoRepository parserInfoRepository;
 
-    public TourViewController(TourRepository tourRepository, TourPriseHistoryRepository tourPriseHistoryRepository, LinkRepository linkRepository, SelectorRepo selectorRepository) {
+    public TourViewController(TourRepository tourRepository, TourPriseHistoryRepository tourPriseHistoryRepository, LinkRepository linkRepository, SelectorRepo selectorRepository, ParserInfoRepository parserInfoRepository) {
         this.tourRepository = tourRepository;
         this.tourPriseHistoryRepository = tourPriseHistoryRepository;
         this.linkRepository = linkRepository;
         this.selectorRepository = selectorRepository;
+        this.parserInfoRepository = parserInfoRepository;
     }
 
     // all tours
     @GetMapping
     public String listAllTours(Model model) {
+
+        // Информация для футера
+        try {
+            ParserInfoEntity parserInfoEntity = parserInfoRepository.findLast();
+
+            String startParsing = parserInfoEntity.getStartParsingTime();
+            String endParsing = parserInfoEntity.getEndParsingTime();
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yy HH:mm");
+            LocalDateTime startParsingTime = LocalDateTime.parse(startParsing, formatter);
+            LocalDateTime endParsingTime = LocalDateTime.parse(endParsing, formatter);
+
+            Duration duration = Duration.between(startParsingTime, endParsingTime);
+
+            long hours = duration.toHours();
+            long minutes = duration.toMinutes() % 60;
+            // Вывод информации по парсингу
+            model.addAttribute("startParsingTime", startParsingTime.format(formatter));
+            model.addAttribute("endParsingTime", endParsingTime.format(formatter));
+            model.addAttribute("totalTime", hours + " часов и " + minutes + " минут");
+            model.addAttribute("passesCount", parserInfoEntity.getPassesCount());
+            model.addAttribute("errorCount", parserInfoEntity.getErrorCount());
+        } catch (NullPointerException ignore) {
+
+        }
+
+
+        // Вывод всех туров
         model.addAttribute("tours", tourRepository.findAll());
         return "tour-list";
     }
