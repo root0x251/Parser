@@ -5,6 +5,7 @@ import com.example.demo.entity.tour.SelectorEntity;
 import com.example.demo.form.LinkSelectorForm;
 import com.example.demo.repository.tour.LinkRepository;
 import com.example.demo.repository.tour.SelectorRepo;
+import com.example.demo.service.ParsingInfoService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +19,12 @@ public class AddTourController {
     private final SelectorRepo selectorRepository;
     private final LinkRepository linkRepository;
 
-    public AddTourController(SelectorRepo selectorRepository, LinkRepository linkRepository) {
+    private final ParsingInfoService parsingInfoService;
+
+    public AddTourController(SelectorRepo selectorRepository, LinkRepository linkRepository, ParsingInfoService parsingInfoService) {
         this.selectorRepository = selectorRepository;
         this.linkRepository = linkRepository;
+        this.parsingInfoService = parsingInfoService;
     }
 
     // Показ формы для добавления ссылки и селектора
@@ -35,6 +39,9 @@ public class AddTourController {
         // Добавляем в модель пустую форму и список селекторов для выпадающего меню
         model.addAttribute("form", form);
         model.addAttribute("selectors", selectors);
+
+        // Инфо по парсингу
+        parsingInfoService.addParsingInfoService(model);
 
         return "add-link-selector"; // шаблон для отображения формы
     }

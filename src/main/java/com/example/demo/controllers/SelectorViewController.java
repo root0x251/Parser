@@ -2,6 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.entity.tour.SelectorEntity;
 import com.example.demo.repository.tour.SelectorRepo;
+import com.example.demo.service.ParsingInfoService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,15 +14,19 @@ import java.util.Optional;
 public class SelectorViewController {
 
     private final SelectorRepo selectorRepo;
+    private final ParsingInfoService parsingInfoService;
 
-    public SelectorViewController(SelectorRepo selectorRepo) {
+    public SelectorViewController(SelectorRepo selectorRepo, ParsingInfoService parsingInfoService) {
         this.selectorRepo = selectorRepo;
+        this.parsingInfoService = parsingInfoService;
     }
 
 
     @GetMapping()
     public String getAllSelectors(Model model) {
         model.addAttribute("selectors", selectorRepo.findAll());
+        // Инфо по парсингу
+        parsingInfoService.addParsingInfoService(model);
         return "selectors";
     }
 
