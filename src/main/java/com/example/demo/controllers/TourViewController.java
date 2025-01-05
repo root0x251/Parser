@@ -8,13 +8,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @RequestMapping({"/", "/tours"})
@@ -47,17 +46,30 @@ public class TourViewController {
 
     // подробнее
     @GetMapping("/tour/{id}")
-    public String getTourDetails(@PathVariable Long id, Model model) {
+    public String getTourDetails(@PathVariable Long id,
+                                 @RequestParam(defaultValue = "7days") String timeframe,
+                                 Model model) {
 
         Optional<TourEntity> optionalTour = tourRepository.findById(id);
         if (optionalTour.isEmpty()) {
-            return "tour-not-found"; // шаблон с ошибкой
+            return "error/404"; // шаблон с ошибкой
         }
 
         TourEntity tour = optionalTour.get();
         LinkEntity link = tour.getLink();
-        List<TourPriceHistoryEntity> tourPriceHistory = tour.getPriceHistory();
 
+        List<TourPriceHistoryEntity> tourPriceHistory;
+
+        // Фильтр за 7 дней
+        if ("7days".equals(timeframe)) {
+            tourPriceHistory = tourPriseHistoryRepository.findLastSevenPrises(tour.getId());
+            Collections.reverse(tourPriceHistory);
+        } else {
+            // Фильтр за все время
+            tourPriceHistory = tourPriseHistoryRepository.findAll(tour.getId());
+        }
+
+        // Информация о старой цене и разнице
         int oldPrice = 0;
         int priceDifference = 0;
         if (!tourPriceHistory.isEmpty()) {
@@ -65,7 +77,7 @@ public class TourViewController {
             priceDifference = tour.getCurrentPrice() - oldPrice;
         }
 
-        // Преобразуем данные из priceHistory для использования в графике
+        // Преобразуем данные для графика
         List<String> dates = new ArrayList<>();
         List<Integer> prices = new ArrayList<>();
 
@@ -80,17 +92,18 @@ public class TourViewController {
         prices.add(tour.getCurrentPrice());
         dates.add(now.format(formatter));
 
-
-        // Передаем данные в модель для отображения на странице
+        // Передаем данные в модель
         model.addAttribute("tour", tour);
         model.addAttribute("link", link);
         model.addAttribute("priceHistoryDates", dates);
         model.addAttribute("priceHistoryPrices", prices);
         model.addAttribute("priceDifference", priceDifference);
         model.addAttribute("oldPrice", oldPrice);
+        model.addAttribute("timeframe", timeframe); // Добавляем параметр фильтрации
 
         return "tour-details";
     }
+
 
 
     // del tour

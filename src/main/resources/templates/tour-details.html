@@ -21,6 +21,7 @@
     </nav>
 
     <h1 class="text-center">Tour Details</h1>
+
     <div class="row mt-4">
         <div class="col-md-6">
             <img src="https://apigate-tui.fstravel.com/api/geocontent/static/Hotel/00210000-ac11-0242-844c-08d9848486ae/MainPhoto-Source-rzybt2di.jpg"
@@ -35,7 +36,7 @@
                     <li class="list-group-item bg-secondary text-light">Location: Sunny Beach Resort</li>
                     <li class="list-group-item bg-secondary text-light" th:text="'Цена тура: ' + ${tour.currentPrice} + ' ₽'"></li>
                     <li class="list-group-item bg-secondary text-light" th:text="'Старая цена: ' + ${oldPrice} + ' ₽'"></li>
-                    <li class="list-group-item bg-secondary text-light" th:text="'Разница в цене: ' + ${priceDifference} + ' ₽'">
+                    <li class="list-group-item bg-secondary text-light" th:text="'Разница в цене: ' + ${priceDifference} + ' ₽'"></li>
                     <li class="list-group-item bg-secondary text-light" th:text="${tour.priceChange}"></li>
                 </ul>
                 <a href="#" class="btn btn-primary mt-3">Book Now</a>
@@ -43,12 +44,28 @@
         </div>
     </div>
 
-
-    <div class="mt-5">
-        <h3 class="text-center">График изменения цен</h3>
-        <canvas id="priceChart" width="400" height="200"></canvas>
+    <!-- Форма для выбора фильтра по времени -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="timeframe">Период изменения цен:</label>
+                <form method="get" th:action="@{/tour/{id}(id=${tour.id})}" onsubmit="saveScrollPosition()">
+                    <select class="form-control" id="timeframe" name="timeframe" th:value="${timeframe}" onchange="this.form.submit()">
+                        <option value="all" th:selected="${timeframe == 'all'}">Все время</option>
+                        <option value="7days" th:selected="${timeframe == '7days'}">7 последних изменений цен</option>
+                    </select>
+                </form>
+            </div>
+        </div>
     </div>
 
+    <!-- График изменения цен -->
+    <div class="row mt-5" id="priceChartSection">
+        <div class="col-md-12">
+            <h3 class="text-center">График изменения цен</h3>
+            <canvas id="priceChart" width="400" height="200"></canvas>
+        </div>
+    </div>
 
 </div>
 
@@ -56,53 +73,62 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- Подключаем адаптер для работы с датами -->
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-
 
 <script th:inline="javascript">
     // Получаем данные из модели
     const priceHistoryDates = /*[[${priceHistoryDates}]]*/ [];
     const priceHistoryPrices = /*[[${priceHistoryPrices}]]*/ [];
 
-    // Вывод данных в консоль для теста
-    console.log('Dates:', priceHistoryDates);
-    console.log('Prices:', priceHistoryPrices);
-
+    // Создаем график
     const ctx = document.getElementById('priceChart').getContext('2d');
-        const priceChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: priceHistoryDates, // Даты на оси X
-                datasets: [{
-                    label: 'Цена', // Название серии
-                    data: priceHistoryPrices, // Цены на оси Y
-                    borderColor: 'rgba(75, 192, 192, 1)', // Цвет линии
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)', // Цвет фона линии
-                    fill: false, // Не заполнять под графиком
-                    tension: 0.1 // Сглаживание линии
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        type: 'category', // Тип оси X (категориальная ось для строковых значений)
-                        title: {
-                            display: true,
-                            text: 'Дата' // Название оси X
-                        }
-                    },
-                    y: {
-                        beginAtZero: false, // Начало оси Y с минимального значения
-                        title: {
-                            display: true,
-                            text: 'Цена' // Название оси Y
-                        }
+    const priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: priceHistoryDates,
+            datasets: [{
+                label: 'Цена',
+                data: priceHistoryPrices,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: false,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    type: 'category',
+                    title: {
+                        display: true,
+                        text: 'Дата'
+                    }
+                },
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Цена'
                     }
                 }
             }
-        });
+        }
+    });
+
+    // Сохранение позиции прокрутки перед отправкой формы
+    function saveScrollPosition() {
+        localStorage.setItem('scrollPosition', window.scrollY);
+    }
+
+    // Восстановление позиции прокрутки после загрузки страницы
+    window.onload = function() {
+        const savedPosition = localStorage.getItem('scrollPosition');
+        if (savedPosition) {
+            window.scrollTo(0, savedPosition);
+            localStorage.removeItem('scrollPosition');  // Очищаем позицию после восстановления
+        }
+    };
 </script>
 
 </body>
