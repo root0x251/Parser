@@ -25,6 +25,10 @@ public class TourEntity {
     private String priceChange;
     @ElementCollection
     private List<String> images;
+    @Column(name = "hotel_address")
+    private String hotelAddress;
+    @Column(name = "tour_start_date")
+    private String tourStartDate;
 
 
     @OneToOne
@@ -40,6 +44,16 @@ public class TourEntity {
         this.currentPrice = currentPrice;
         this.priceChange = priceChange;
         this.images = images;
+        this.link = link;
+    }
+
+    public TourEntity(String hotelName, int currentPrice, String priceChange, List<String> images, String hotelAddress, String tourStartDate, LinkEntity link) {
+        this.hotelName = hotelName;
+        this.currentPrice = currentPrice;
+        this.priceChange = priceChange;
+        this.images = images;
+        this.hotelAddress = hotelAddress;
+        this.tourStartDate = tourStartDate;
         this.link = link;
     }
 

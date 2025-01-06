@@ -23,14 +23,17 @@ public class SelectorEntity {
     @Column(name = "which_site", columnDefinition = "TEXT")
     private String whichSite;
 
-    public SelectorEntity(String hotelSelector, String priceSelector) {
-        this.hotelSelector = hotelSelector;
-        this.priceSelector = priceSelector;
-    }
+    @Column(name = "tour_start_date")
+    private String tourStartDateSelector;
 
-    public SelectorEntity(String hotelSelector, String priceSelector, String whichSite) {
+    @Column(name = "hotel_address")
+    private String hotelAddressSelector;
+
+    public SelectorEntity(String hotelSelector, String priceSelector, String whichSite, String tourStartDateSelector, String hotelAddressSelector) {
         this.hotelSelector = hotelSelector;
         this.priceSelector = priceSelector;
         this.whichSite = whichSite;
+        this.tourStartDateSelector = tourStartDateSelector;
+        this.hotelAddressSelector = hotelAddressSelector;
     }
 }

@@ -31,14 +31,26 @@
 
                         <!-- hotelSelector -->
                         <div class="mb-3">
-                            <label for="hotelSelector" class="form-label">Hotel Selector</label>
+                            <label for="hotelSelector" class="form-label">Наименование отеля</label>
                             <input type="text" id="hotelSelector" name="hotelSelector" class="form-control"
                                    th:value="${selector.hotelSelector}" required>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="tourStartDateSelector" class="form-label">Даты тура</label>
+                            <input type="text" id="tourStartDateSelector" name="tourStartDateSelector" class="form-control"
+                                   th:value="${selector.tourStartDateSelector}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="hotelAddressSelector" class="form-label">Адрес отеля</label>
+                            <input type="text" id="hotelAddressSelector" name="hotelAddressSelector" class="form-control"
+                                   th:value="${selector.hotelAddressSelector}" required>
+                        </div>
+
                         <!-- priceSelector -->
                         <div class="mb-3">
-                            <label for="priceSelector" class="form-label">Price Selector</label>
+                            <label for="priceSelector" class="form-label">Стоимость тура:<br></label>
                             <input type="text" id="priceSelector" name="priceSelector" class="form-control"
                                    th:value="${selector.priceSelector}" required>
                         </div>

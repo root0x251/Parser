@@ -49,7 +49,9 @@ public class SelectorViewController {
     public String updateSelector(@PathVariable("id") Long id,
                                  @RequestParam("whichSite") String whichSite,
                                  @RequestParam("hotelSelector") String hotelSelector,
-                                 @RequestParam("priceSelector") String priceSelector) {
+                                 @RequestParam("priceSelector") String priceSelector,
+                                 @RequestParam("tourStartDateSelector") String tourStartDate,
+                                 @RequestParam("hotelAddressSelector") String hotelAddress) {
         // поиск селектора по ID
         Optional<SelectorEntity> selectorOptional = selectorRepo.findById(id);
 
@@ -64,6 +66,8 @@ public class SelectorViewController {
         selector.setWhichSite(whichSite);
         selector.setHotelSelector(hotelSelector);
         selector.setPriceSelector(priceSelector);
+        selector.setTourStartDateSelector(tourStartDate);
+        selector.setHotelAddressSelector(hotelAddress);
 
         selectorRepo.save(selector);
 

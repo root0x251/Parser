@@ -11,4 +11,6 @@ public class LinkSelectorForm {
     private String whichSite;
     private String hotelNameSelector;
     private String priceSelector;
+    private String tourStartDate;
+    private String hotelAddress;
 }

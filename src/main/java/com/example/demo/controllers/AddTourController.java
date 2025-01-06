@@ -62,10 +62,7 @@ public class AddTourController {
             selector = selectorRepository.findById(form.getExistingWhichSiteId()).orElseThrow();
         } else {
             // Введено новое значение whichSite
-            selector = new SelectorEntity();
-            selector.setHotelSelector(form.getHotelNameSelector());
-            selector.setPriceSelector(form.getPriceSelector());
-            selector.setWhichSite(form.getWhichSite());
+            selector = new SelectorEntity(form.getHotelNameSelector(), form.getPriceSelector(), form.getWhichSite(), form.getTourStartDate(), form.getHotelAddress());
             selectorRepository.save(selector);
         }
 

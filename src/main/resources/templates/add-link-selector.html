@@ -14,33 +14,43 @@
 
 
 <div class="container mt-4">
-    <h1 class="text-center">Add a New Tour</h1>
+    <h1 class="text-center">Добавление тура</h1>
     <form class="mt-4 bg-secondary p-4 rounded" th:action="@{/addLinkSelector}" th:object="${form}" method="post">
         <div class="mb-3">
             <label for="url" class="form-label">Tour Link</label>
             <input type="url" class="form-control" id="url" placeholder="Enter the URL of the tour" th:field="*{url}" required/>
         </div>
         <div class="mb-3">
-            <label for="existingWhichSite" class="form-label">Select Which Site (optional):</label>
+            <label for="existingWhichSite" class="form-label">С какого сайта:</label>
             <select class="form-select" id="existingWhichSite" th:field="*{existingWhichSiteId}" onchange="toggleFields()">
-                <option value="">--- Select from existing ---</option>
+                <option value="">--- Выбрать из имеющегося ---</option>
                 <option th:each="selector : ${selectors}" th:value="${selector.id}" th:text="${selector.whichSite}"></option>
             </select>
         </div>
 
         <div class="mb-3">
-            <label for="whichSite" class="form-label">Which Site (if adding new):</label>
+            <label for="whichSite" class="form-label">С какого сайта добавляем</label>
             <input type="text" id="whichSite" th:field="*{whichSite}" class="form-control" placeholder="For example fun/biblio" required/>
         </div>
 
         <div class="mb-3">
-            <label for="hotelNameSelector" class="form-label">Hotel Name Selector</label>
+            <label for="hotelNameSelector" class="form-label">Наименование отеля</label>
             <input type="text" class="form-control" id="hotelNameSelector" th:field="*{hotelNameSelector}" placeholder="For example: #app > div > ****" required/>
         </div>
 
         <div class="mb-3">
-            <label for="priceSelector" class="form-label">Price Selector</label>
+            <label for="priceSelector" class="form-label">Цена отеля</label>
             <input type="text" class="form-control" id="priceSelector" th:field="*{priceSelector}" placeholder="For example: #app > div > ****" required/>
+        </div>
+
+        <div class="mb-3">
+            <label for="tourStartDate" class="form-label">Дата начала тура</label>
+            <input type="text" class="form-control" id="tourStartDate" th:field="*{tourStartDate}" placeholder="For example: #app > div > ****"/>
+        </div>
+
+        <div class="mb-3">
+            <label for="hotelAddress" class="form-label">Адрес отеля</label>
+            <input type="text" class="form-control" id="hotelAddress" th:field="*{hotelAddress}" placeholder="For example: #app > div > ****" required/>
         </div>
 
         <button type="submit" class="btn btn-primary">Add Tour</button>
@@ -58,6 +68,8 @@
         const whichSiteField = document.getElementById('whichSite');
         const hotelNameSelectorField = document.getElementById('hotelNameSelector');
         const priceSelectorField = document.getElementById('priceSelector');
+        const tourStartDate = document.getElementById('tourStartDate');
+        const hotelAddress = document.getElementById('hotelAddress');
 
         // Если выбран элемент из списка (не пустой выбор)
         if (selectElement.value) {
@@ -65,11 +77,15 @@
             whichSiteField.disabled = true;
             hotelNameSelectorField.disabled = true;
             priceSelectorField.disabled = true;
+            tourStartDate.disabled = true;
+            hotelAddress.disabled = true;
         } else {
             // Если не выбран элемент, сделать поля доступными
             whichSiteField.disabled = false;
             hotelNameSelectorField.disabled = false;
             priceSelectorField.disabled = false;
+            tourStartDate.disabled = false;
+            hotelAddress.disabled = false;
         }
     }
 

@@ -49,6 +49,8 @@ public class TourViewController {
     public String getTourDetails(@PathVariable Long id,
                                  @RequestParam(defaultValue = "7days") String timeframe,
                                  Model model) {
+        // Информация по парсингу для футера
+        parsingInfoService.addParsingInfoService(model);
 
         Optional<TourEntity> optionalTour = tourRepository.findById(id);
         if (optionalTour.isEmpty()) {

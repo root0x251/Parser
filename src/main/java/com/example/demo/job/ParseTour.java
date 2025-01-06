@@ -35,6 +35,8 @@ public class ParseTour {
     // Инфо по туру
     private String hotelName = "Null";
     private int priceInt = 0;
+    private String hotelAddress = "Null";
+    private String tourStartDate = "Null";
     private List<String> images;
 
     // информация для ParsingInfo, сбор метрик
@@ -50,7 +52,8 @@ public class ParseTour {
     private final ParserInfoRepository parserInfoRepository;
 
     @Autowired
-    public ParseTour(LinkRepository linkRepository, TourRepository tourRepository, TourPriseHistoryRepository tourPriseHistoryRepository, LogErrorRepo logErrorRepo, ParserInfoRepository parserInfoRepository) {
+    public ParseTour(LinkRepository linkRepository, TourRepository tourRepository, TourPriseHistoryRepository tourPriseHistoryRepository,
+                     LogErrorRepo logErrorRepo, ParserInfoRepository parserInfoRepository) {
         this.linkRepository = linkRepository;
         this.tourRepository = tourRepository;
         this.tourPriseHistoryRepository = tourPriseHistoryRepository;
@@ -73,7 +76,9 @@ public class ParseTour {
                 webDriver = new ChromeDriver(options);
                 webDriver.get(link.getLink());
 
-                startParse(webDriver, link.getSelectorEntity().getHotelSelector(), link.getSelectorEntity().getPriceSelector(), link.getLink());
+                startParse(webDriver, link.getSelectorEntity().getHotelSelector(), link.getSelectorEntity().getPriceSelector(),
+                        link.getLink(), link.getSelectorEntity().getTourStartDateSelector(), link.getSelectorEntity().getHotelAddressSelector(),
+                        link.getSelectorEntity().getWhichSite());
 
                 if (priceInt < MIN_PRICE_THRESHOLD) {
                     errorLog("Low Price", hotelName, link.getLink());
@@ -81,14 +86,19 @@ public class ParseTour {
                     workWithDB(link);
                 }
             } catch (Exception e) {
-                errorLog(e.getClass().getSimpleName() + "\n ==== Start parsing ====");
+                errorLog(e.getClass().getSimpleName() + "\n Start parsing");
             } finally {
                 if (webDriver != null) {
                     webDriverQuit(webDriver);
+                    hotelName = "Null";
+                    priceInt = 0;
+                    hotelAddress = "Null";
+                    tourStartDate = "Null";
+
                 }
             }
         }
-        parserInfoRepository.save(new ParserInfoEntity(startParsingTime ,currentDate(), passesCounter, errorCounter));
+        parserInfoRepository.save(new ParserInfoEntity(startParsingTime, currentDate(), passesCounter, errorCounter));
         passesCounter = 0;
         errorCounter = 0;
 
@@ -96,14 +106,22 @@ public class ParseTour {
         isParserRunning.set(false);
     }
 
-    private void startParse(WebDriver webDriver, String selectorHotelName, String selectorHotelPrice, String tourLink) {
+    private void startParse(WebDriver webDriver, String selectorHotelName, String selectorHotelPrice, String tourLink,
+                            String selectorTourStartDate, String selectorHotelAddress, String whichSite) {
         sleep(webDriver);
 
         try {
             scrollDownAndUp(webDriver);
             hotelName = webDriver.findElement(By.xpath(selectorHotelName)).getText();
             priceInt = Integer.parseInt(webDriver.findElement(By.xpath(selectorHotelPrice)).getText().replaceAll("[^\\d.]", ""));
+            hotelAddress = webDriver.findElement(By.xpath(selectorHotelAddress)).getText();
 
+            // я в отчаяние, это SFG@#$...
+            if (!whichSite.equalsIgnoreCase("biblio")) {
+                tourStartDate = webDriver.findElement(By.xpath(selectorTourStartDate)).getText();
+            } else {
+                tourStartDate = dataForBiblio(tourLink);
+            }
             // add images to list
             searchImage(webDriver);
 
@@ -111,6 +129,23 @@ public class ParseTour {
             errorLog(e.getClass().getSimpleName(), selectorHotelName, tourLink);
             webDriverQuit(webDriver);
         }
+    }
+
+    private String dataForBiblio(String url) {
+        String date;
+        String nights;
+        String regex = "#/~htf/\\d+/([\\d]{2}\\.\\d{2}\\.\\d{4})/\\d+\\.\\d+/([\\d]+)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(url);
+
+        if (matcher.find()) {
+            date = matcher.group(1);
+            nights = matcher.group(2);
+            return "с " + date + ", " + nights + " ночей";
+        } else {
+            return "говнокод";
+        }
+
     }
 
     private void searchImage(WebDriver webDriver) {
@@ -182,7 +217,7 @@ public class ParseTour {
     }
 
     private void createNewTour(LinkEntity linkEntity) {
-        TourEntity tour = new TourEntity(hotelName, priceInt, "Без изменений", images, linkEntity);
+        TourEntity tour = new TourEntity(hotelName, priceInt, "Без изменений", images, hotelAddress, tourStartDate, linkEntity);
         // Сохранение тура в базу данных
         tourRepository.save(tour);
     }
@@ -208,7 +243,7 @@ public class ParseTour {
         }
     }
 
-    private void errorLog(String errorCode) {
+    public void errorLog(String errorCode) {
         errorCounter++;
         if (!logErrorRepo.existsByDate(currentDate())) {
             LogErrorEntity logErrorEntity = new LogErrorEntity(errorCode, currentDate());
