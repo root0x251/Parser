@@ -12,51 +12,68 @@
 
 <div th:replace="~{fragments/nav}"></div>
 
-
 <div class="container mt-4">
     <h1 class="text-center">Добавление тура</h1>
-    <form class="mt-4 bg-secondary p-4 rounded" th:action="@{/addLinkSelector}" th:object="${form}" method="post">
+    <form class="mt-4 bg-secondary p-4 rounded" action="/addLinkSelector" method="post">
+
+        <!-- Поле Tour Link всегда активное -->
         <div class="mb-3">
-            <label for="url" class="form-label">Tour Link</label>
-            <input type="url" class="form-control" id="url" placeholder="Enter the URL of the tour" th:field="*{url}" required/>
+            <label for="url" class="form-label">Ссылка на тур</label>
+            <input type="url" class="form-control" id="url" name="url" placeholder="Enter the URL of the tour"
+                   required/>
         </div>
+
+        <!-- Выпадающее меню для выбора существующего сайта -->
         <div class="mb-3">
             <label for="existingWhichSite" class="form-label">С какого сайта:</label>
-            <select class="form-select" id="existingWhichSite" th:field="*{existingWhichSiteId}" onchange="toggleFields()">
-                <option value="">--- Выбрать из имеющегося ---</option>
-                <option th:each="selector : ${selectors}" th:value="${selector.id}" th:text="${selector.whichSite}"></option>
+            <select class="form-select" id="existingWhichSite" name="existingWhichSiteId" onchange="toggleFields()">
+                <option value="">--- Если шаблонный поиск, выбрать из имеющегося или создать новый шаблон ---</option>
+                <option th:each="selector : ${selectors}" th:value="${selector.id}"
+                        th:text="${selector.whichSite}"></option>
             </select>
+        </div>
+
+        <!-- Чекбокс для альтернативного выбора -->
+        <div class="mb-3">
+            <label for="useCheckbox" class="form-label">Если сайт не шаблонный, оставить </label>
+            <input type="checkbox" class="form-check-input" id="useCheckbox" name="useCheckbox" checked
+                   onchange="toggleFields()">
+            <!--            <label class="form-check-label" for="useCheckbox">, если сайт не шаблонный</label>-->
         </div>
 
         <div class="mb-3">
             <label for="whichSite" class="form-label">С какого сайта добавляем</label>
-            <input type="text" id="whichSite" th:field="*{whichSite}" class="form-control" placeholder="For example fun/biblio" required/>
+            <input type="text" id="whichSite" name="whichSite" class="form-control" placeholder="For example fun/biblio"
+                   required/>
         </div>
 
         <div class="mb-3">
             <label for="hotelNameSelector" class="form-label">Наименование отеля</label>
-            <input type="text" class="form-control" id="hotelNameSelector" th:field="*{hotelNameSelector}" placeholder="For example: #app > div > ****" required/>
+            <input type="text" class="form-control" id="hotelNameSelector" name="hotelNameSelector"
+                   placeholder="For example: #app > div > ****" required/>
         </div>
 
         <div class="mb-3">
             <label for="priceSelector" class="form-label">Цена отеля</label>
-            <input type="text" class="form-control" id="priceSelector" th:field="*{priceSelector}" placeholder="For example: #app > div > ****" required/>
+            <input type="text" class="form-control" id="priceSelector" name="priceSelector"
+                   placeholder="For example: #app > div > ****" required/>
         </div>
 
         <div class="mb-3">
             <label for="tourStartDate" class="form-label">Дата начала тура</label>
-            <input type="text" class="form-control" id="tourStartDate" th:field="*{tourStartDate}" placeholder="For example: #app > div > ****"/>
+            <input type="text" class="form-control" id="tourStartDate" name="tourStartDate"
+                   placeholder="For example: #app > div > ****"/>
         </div>
 
         <div class="mb-3">
             <label for="hotelAddress" class="form-label">Адрес отеля</label>
-            <input type="text" class="form-control" id="hotelAddress" th:field="*{hotelAddress}" placeholder="For example: #app > div > ****" required/>
+            <input type="text" class="form-control" id="hotelAddress" name="hotelAddress"
+                   placeholder="For example: #app > div > ****" required/>
         </div>
 
-        <button type="submit" class="btn btn-primary">Add Tour</button>
+        <button type="submit" class="btn btn-primary">Добавить тур</button>
     </form>
 </div>
-
 
 <div th:replace="~{fragments/footer}"></div>
 
@@ -68,29 +85,36 @@
         const whichSiteField = document.getElementById('whichSite');
         const hotelNameSelectorField = document.getElementById('hotelNameSelector');
         const priceSelectorField = document.getElementById('priceSelector');
-        const tourStartDate = document.getElementById('tourStartDate');
-        const hotelAddress = document.getElementById('hotelAddress');
+        const tourStartDateField = document.getElementById('tourStartDate');
+        const hotelAddressField = document.getElementById('hotelAddress');
+        const useCheckbox = document.getElementById('useCheckbox');
 
-        // Если выбран элемент из списка (не пустой выбор)
+        // Если чекбокс активен, делаем выпадающее меню неактивным
+        if (useCheckbox.checked) {
+            selectElement.disabled = true;
+        } else {
+            selectElement.disabled = false;
+        }
+
+        // Если выбран элемент в выпадающем меню, делаем все поля (кроме Tour Link) неактивными
         if (selectElement.value) {
-            // Сделать остальные поля недоступными
             whichSiteField.disabled = true;
             hotelNameSelectorField.disabled = true;
             priceSelectorField.disabled = true;
-            tourStartDate.disabled = true;
-            hotelAddress.disabled = true;
+            tourStartDateField.disabled = true;
+            hotelAddressField.disabled = true;
         } else {
-            // Если не выбран элемент, сделать поля доступными
             whichSiteField.disabled = false;
             hotelNameSelectorField.disabled = false;
             priceSelectorField.disabled = false;
-            tourStartDate.disabled = false;
-            hotelAddress.disabled = false;
+            tourStartDateField.disabled = false;
+            hotelAddressField.disabled = false;
         }
     }
 
     // Вызовем функцию, чтобы правильно установить начальное состояние (когда ничего не выбрано)
     toggleFields();
 </script>
+
 </body>
 </html>

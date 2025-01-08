@@ -130,7 +130,7 @@ public class TourViewController {
         linkRepository.delete(link);
 
         // Проверка, пустой ли which_site у селектора
-        if (selector.getWhichSite() == null || selector.getWhichSite().isEmpty()) {
+        if (!selector.isTemplate()) {
             selectorRepository.delete(selector);
         }
 

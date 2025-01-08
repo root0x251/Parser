@@ -25,7 +25,7 @@ public class TourEntity {
     private String priceChange;
     @ElementCollection
     private List<String> images;
-    @Column(name = "hotel_address")
+    @Column(name = "hotel_address", columnDefinition = "TEXT")
     private String hotelAddress;
     @Column(name = "tour_start_date")
     private String tourStartDate;

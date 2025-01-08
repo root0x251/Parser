@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 public class SelectorEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Long id;
 
-    @Column(name = "hotel_name_selector", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "hotel_name_selector", columnDefinition = "TEXT")
     private String hotelSelector;
 
-    @Column(name = "price_selector", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "price_selector", columnDefinition = "TEXT")
     private String priceSelector;
 
     @Column(name = "which_site", columnDefinition = "TEXT")
@@ -29,11 +29,16 @@ public class SelectorEntity {
     @Column(name = "hotel_address")
     private String hotelAddressSelector;
 
-    public SelectorEntity(String hotelSelector, String priceSelector, String whichSite, String tourStartDateSelector, String hotelAddressSelector) {
+    @Column(name = "is_template")
+    private boolean isTemplate;
+
+    public SelectorEntity(String hotelSelector, String priceSelector, String whichSite, String tourStartDateSelector, String hotelAddressSelector, boolean isTemplate) {
         this.hotelSelector = hotelSelector;
         this.priceSelector = priceSelector;
         this.whichSite = whichSite;
         this.tourStartDateSelector = tourStartDateSelector;
         this.hotelAddressSelector = hotelAddressSelector;
+        this.isTemplate = isTemplate;
     }
+
 }

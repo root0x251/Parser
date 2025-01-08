@@ -28,7 +28,7 @@ public class ParseTour {
     public static AtomicBoolean isParserRunning = new AtomicBoolean(false);
 
     // константы для минимальной цены и таймера
-    private static final int MIN_PRICE_THRESHOLD = 150000;
+    private static final int MIN_PRICE_THRESHOLD = 50000;
     private static final int MIN_SLEEP_MS = 8000;
     private static final int MAX_SLEEP_MS = 13000;
 
@@ -79,14 +79,13 @@ public class ParseTour {
                 startParse(webDriver, link.getSelectorEntity().getHotelSelector(), link.getSelectorEntity().getPriceSelector(),
                         link.getLink(), link.getSelectorEntity().getTourStartDateSelector(), link.getSelectorEntity().getHotelAddressSelector(),
                         link.getSelectorEntity().getWhichSite());
-
                 if (priceInt < MIN_PRICE_THRESHOLD) {
                     errorLog("Low Price", hotelName, link.getLink());
                 } else {
                     workWithDB(link);
                 }
             } catch (Exception e) {
-                errorLog(e.getClass().getSimpleName() + "\n Start parsing");
+                errorLog(e.getClass().getSimpleName() + "on Start parsing");
             } finally {
                 if (webDriver != null) {
                     webDriverQuit(webDriver);
@@ -115,37 +114,15 @@ public class ParseTour {
             hotelName = webDriver.findElement(By.xpath(selectorHotelName)).getText();
             priceInt = Integer.parseInt(webDriver.findElement(By.xpath(selectorHotelPrice)).getText().replaceAll("[^\\d.]", ""));
             hotelAddress = webDriver.findElement(By.xpath(selectorHotelAddress)).getText();
+            tourStartDate = webDriver.findElement(By.xpath(selectorTourStartDate)).getText();
 
-            // я в отчаяние, это SFG@#$...
-            if (!whichSite.equalsIgnoreCase("biblio")) {
-                tourStartDate = webDriver.findElement(By.xpath(selectorTourStartDate)).getText();
-            } else {
-                tourStartDate = dataForBiblio(tourLink);
-            }
-            // add images to list
+            // search and add images to list
             searchImage(webDriver);
 
         } catch (NoSuchElementException | NumberFormatException | TimeoutException e) {
             errorLog(e.getClass().getSimpleName(), selectorHotelName, tourLink);
             webDriverQuit(webDriver);
         }
-    }
-
-    private String dataForBiblio(String url) {
-        String date;
-        String nights;
-        String regex = "#/~htf/\\d+/([\\d]{2}\\.\\d{2}\\.\\d{4})/\\d+\\.\\d+/([\\d]+)";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(url);
-
-        if (matcher.find()) {
-            date = matcher.group(1);
-            nights = matcher.group(2);
-            return "с " + date + ", " + nights + " ночей";
-        } else {
-            return "говнокод";
-        }
-
     }
 
     private void searchImage(WebDriver webDriver) {
@@ -176,6 +153,8 @@ public class ParseTour {
                     }
                 }
             }
+        } catch (NoSuchElementException e) {
+            errorLog(e.getClass().getSimpleName() + hotelName + " image search");
         } finally {
             if (images.isEmpty()) {
                 images.add("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZZV4k1vp1lymw9Q7x5a53uyW-quMhSZymZQ&s");
@@ -264,7 +243,7 @@ public class ParseTour {
         try {
             Thread.sleep(rand);
         } catch (InterruptedException e) {
-            errorLog(e.getClass().getSimpleName() + "\n===== Timer =====");
+            errorLog(e.getClass().getSimpleName() + "on Timer");
             webDriverQuit(webDriver);
         }
     }
