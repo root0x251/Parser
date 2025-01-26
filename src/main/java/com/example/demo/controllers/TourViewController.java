@@ -3,6 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.entity.tour.*;
 import com.example.demo.repository.tour.*;
 import com.example.demo.service.ParsingInfoService;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +41,7 @@ public class TourViewController {
         // Информация по парсингу для футера
         parsingInfoService.addParsingInfoService(model);
         // Вывод всех туров
-        model.addAttribute("tours", tourRepository.findAll());
+        model.addAttribute("tours", tourRepository.findAll(Sort.by(Sort.Direction.ASC, "currentPrice")));
         return "tour-list";
     }
 
@@ -77,6 +78,9 @@ public class TourViewController {
         if (!tourPriceHistory.isEmpty()) {
             oldPrice = tourPriceHistory.get(tourPriceHistory.size() - 1).getOldPrice();
             priceDifference = tour.getCurrentPrice() - oldPrice;
+            if (priceDifference < 0) {
+                priceDifference = priceDifference * -1;
+            }
         }
 
         // Преобразуем данные для графика
@@ -97,11 +101,13 @@ public class TourViewController {
         // Передаем данные в модель
         model.addAttribute("tour", tour);
         model.addAttribute("link", link);
-        model.addAttribute("priceHistoryDates", dates);
-        model.addAttribute("priceHistoryPrices", prices);
         model.addAttribute("priceDifference", priceDifference);
         model.addAttribute("oldPrice", oldPrice);
+
+        // график цен
         model.addAttribute("timeframe", timeframe); // Добавляем параметр фильтрации
+        model.addAttribute("priceHistoryDates", dates);
+        model.addAttribute("priceHistoryPrices", prices);
 
         return "tour-details";
     }

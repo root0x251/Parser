@@ -48,6 +48,7 @@ public class SelectorViewController {
     @PostMapping("/update/{id}")
     public String updateSelector(@PathVariable("id") Long id,
                                  @RequestParam("whichSite") String whichSite,
+                                 @RequestParam("siteLogo") String siteLogo,
                                  @RequestParam("hotelSelector") String hotelSelector,
                                  @RequestParam("priceSelector") String priceSelector,
                                  @RequestParam("tourStartDateSelector") String tourStartDate,
@@ -64,6 +65,7 @@ public class SelectorViewController {
 
         // обновление данных
         selector.setWhichSite(whichSite);
+        selector.setSiteLogo(siteLogo);
         selector.setHotelSelector(hotelSelector);
         selector.setPriceSelector(priceSelector);
         selector.setTourStartDateSelector(tourStartDate);

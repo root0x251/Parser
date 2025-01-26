@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tour Details</title>
+    <title>Информация о туре</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
@@ -15,33 +15,45 @@
 <div class="container mt-4">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb bg-dark">
-            <li class="breadcrumb-item"><a href="/tours" class="text-light">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Tour Details</li>
+            <li class="breadcrumb-item"><a href="/tours" class="text-light">Главная</a></li>
         </ol>
     </nav>
 
-    <h1 class="text-center">Tour Details</h1>
+    <h1 class="text-center">Информация о туре</h1>
 
     <div class="row mt-4">
-        <div class="col-md-6">
-            <img src="https://apigate-tui.fstravel.com/api/geocontent/static/Hotel/00210000-ac11-0242-844c-08d9848486ae/MainPhoto-Source-rzybt2di.jpg"
-                 class="img-fluid rounded" alt="Tour Image">
-        </div>
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="bg-secondary p-3 rounded">
                 <h5 th:text="${tour.hotelName}"></h5>
-                <p>Here you can find a detailed description of the tour, including amenities, activities, and the
-                    surrounding area. This is the perfect getaway for those seeking both relaxation and adventure.</p>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item bg-secondary text-light">Location: Sunny Beach Resort</li>
-                    <li class="list-group-item bg-secondary text-light" th:text="'Цена тура: ' + ${tour.currentPrice} + ' ₽'"></li>
-                    <li class="list-group-item bg-secondary text-light" th:text="'Старая цена: ' + ${oldPrice} + ' ₽'"></li>
-                    <li class="list-group-item bg-secondary text-light" th:text="'Разница в цене: ' + ${priceDifference} + ' ₽'"></li>
-                    <li class="list-group-item bg-secondary text-light" th:text="${tour.priceChange}"></li>
+                    <li class="list-group-item bg-secondary text-light" th:text="'Локация: ' + ${tour.hotelAddress}"></li>
+                    <li class="list-group-item bg-secondary text-light" th:text="'Начало тура: ' + ${tour.tourStartDate}"></li>
+                    <li class="list-group-item bg-secondary text-light" th:text="'Цена на старте: ' + ${tour.tourStartPrice} + ' ₽'"></li>
+                    <li class="list-group-item bg-secondary text-light" th:text="'Нынешняя цена: ' + ${tour.currentPrice} + ' ₽'"></li>
+                    <li class="list-group-item bg-secondary text-light" th:text="'Предыдущая цена: ' + ${oldPrice} + ' ₽'"></li>
+<!--                    <li class="list-group-item bg-secondary text-light" th:text="${tour.priceChange}"></li>-->
+<!--                    <li class="list-group-item bg-secondary text-light" th:text="'Разница в цене: ' + ${priceDifference} + ' ₽'"></li>-->
+                    <li class="list-group-item bg-secondary text-light"
+                        th:text="${tour.priceChange == 'Без изменений' ? 'Цена не изменилась' : (tour.priceChange + ' на ' + priceDifference + ' ₽')}">
+                    </li>
+                    </li>
                 </ul>
-                <a href="#" class="btn btn-primary mt-3">Book Now</a>
+                <a th:href="${tour.link.link}" class="btn btn-primary mt-3" target="_blank">Ссылка на тур</a>
             </div>
         </div>
+
+<!--        <div class="col-md-6">-->
+<!--            <div class="bg-secondary p-3 rounded">-->
+<!--                <h5 th:text="${tour.hotelName}"></h5>-->
+<!--                <ul class="list-group list-group-flush">-->
+<!--                    <li class="list-group-item bg-secondary text-light" th:text="'Старая цена: ' + ${oldPrice} + ' ₽'"></li>-->
+<!--                    <li class="list-group-item bg-secondary text-light" th:text="'Цена тура: ' + ${tour.currentPrice} + ' ₽'"></li>-->
+<!--                    <li class="list-group-item bg-secondary text-light" th:text="'Разница в цене: ' + ${priceDifference} + ' ₽'"></li>-->
+<!--                    <li class="list-group-item bg-secondary text-light" th:text="${tour.priceChange}"></li>-->
+<!--                </ul>-->
+<!--                <a href="#" class="btn btn-primary mt-3">Book Now</a>-->
+<!--            </div>-->
+<!--        </div>-->
     </div>
 
     <!-- Форма для выбора фильтра по времени -->

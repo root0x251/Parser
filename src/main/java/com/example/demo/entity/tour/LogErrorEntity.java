@@ -17,7 +17,7 @@ public class LogErrorEntity {
     private String date;
     @Column(name = "tour_name")
     private String tourName;
-    @Column(name = "tour_link")
+    @Column(name = "tour_link", columnDefinition = "TEXT")
     private String tourLink;
 
     public LogErrorEntity(String description, String date) {

@@ -23,21 +23,25 @@ public class SelectorEntity {
     @Column(name = "which_site", columnDefinition = "TEXT")
     private String whichSite;
 
-    @Column(name = "tour_start_date")
+    @Column(name = "tour_start_date", columnDefinition = "TEXT")
     private String tourStartDateSelector;
 
-    @Column(name = "hotel_address")
+    @Column(name = "hotel_address", columnDefinition = "TEXT")
     private String hotelAddressSelector;
+
+    @Column(name = "site_logo", columnDefinition = "TEXT")
+    private String siteLogo;
 
     @Column(name = "is_template")
     private boolean isTemplate;
 
-    public SelectorEntity(String hotelSelector, String priceSelector, String whichSite, String tourStartDateSelector, String hotelAddressSelector, boolean isTemplate) {
+    public SelectorEntity(String hotelSelector, String priceSelector, String whichSite, String tourStartDateSelector, String hotelAddressSelector, String siteLogo, boolean isTemplate) {
         this.hotelSelector = hotelSelector;
         this.priceSelector = priceSelector;
         this.whichSite = whichSite;
         this.tourStartDateSelector = tourStartDateSelector;
         this.hotelAddressSelector = hotelAddressSelector;
+        this.siteLogo = siteLogo;
         this.isTemplate = isTemplate;
     }
 

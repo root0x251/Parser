@@ -47,6 +47,7 @@ public class AddTourController {
                                             @RequestParam(value = "url", required = false) String url,
                                             @RequestParam(value = "existingWhichSiteId", required = false) Long existingWhichSiteId,
                                             @RequestParam(value = "whichSite", required = false) String whichSite,
+                                            @RequestParam(value = "siteLogo", required = false) String siteLogo,
                                             @RequestParam(value = "hotelNameSelector", required = false) String hotelNameSelector,
                                             @RequestParam(value = "priceSelector", required = false) String priceSelector,
                                             @RequestParam(value = "tourStartDate", required = false) String tourStartDate,
@@ -59,7 +60,7 @@ public class AddTourController {
             // проверка чекбокс или выпадающий список, или проверка на существование
             if (useCheckbox != null && useCheckbox) {
                 // добавление сайта без шаблона
-                selector = new SelectorEntity(hotelNameSelector, priceSelector, whichSite, tourStartDate, hotelAddress, false);
+                selector = new SelectorEntity(hotelNameSelector, priceSelector, whichSite, tourStartDate, hotelAddress, siteLogo, false);
                 selectorRepository.save(selector);
             } else {
                 // Проверка существования тура
@@ -68,7 +69,7 @@ public class AddTourController {
                     selector = selectorRepository.findById(existingWhichSiteId).orElseThrow();
                 } else {
                     // Создать новый селектор
-                    selector = new SelectorEntity(hotelNameSelector, priceSelector, whichSite, tourStartDate, hotelAddress, true);
+                        selector = new SelectorEntity(hotelNameSelector, priceSelector, whichSite, tourStartDate, hotelAddress, siteLogo, true);
                     selectorRepository.save(selector);
                 }
             }
