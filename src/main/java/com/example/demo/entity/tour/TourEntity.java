@@ -31,6 +31,8 @@ public class TourEntity {
     private String tourStartDate;
     @Column(name = "logo", columnDefinition = "TEXT")
     private String logo;
+    @ElementCollection
+    private List<String> images;
 
 
     @OneToOne
@@ -41,7 +43,7 @@ public class TourEntity {
     @OneToMany(mappedBy = "tourEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<TourPriceHistoryEntity> priceHistory = new ArrayList<>();
 
-    public TourEntity(String hotelName, int tourStartPrice, int currentPrice, String priceChange, String hotelAddress, String tourStartDate, LinkEntity link, String logo) {
+    public TourEntity(String hotelName, int tourStartPrice, int currentPrice, String priceChange, String hotelAddress, String tourStartDate, LinkEntity link, String logo, List<String> images) {
         this.hotelName = hotelName;
         this.tourStartPrice = tourStartPrice;
         this.currentPrice = currentPrice;
@@ -50,6 +52,7 @@ public class TourEntity {
         this.tourStartDate = tourStartDate;
         this.link = link;
         this.logo = logo;
+        this.images = images;
     }
 
     @Override

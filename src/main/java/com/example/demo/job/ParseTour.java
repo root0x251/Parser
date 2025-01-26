@@ -4,6 +4,7 @@ import com.example.demo.entity.tour.*;
 import com.example.demo.repository.tour.*;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +14,10 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class ParseTour {
@@ -38,6 +38,8 @@ public class ParseTour {
     private String hotelAddress = "Null";
     private String tourStartDate = "Null";
     private String siteLogo = "Null";
+    // Carousel
+    private List<String> images;
 
     // информация для ParsingInfo, сбор метрик
     private long errorCounter = 0;
@@ -86,6 +88,7 @@ public class ParseTour {
                         link.getSelectorEntity().getPriceSelector(), link.getLink(),
                         link.getSelectorEntity().getTourStartDateSelector(),
                         link.getSelectorEntity().getHotelAddressSelector());
+
                 if (priceInt < MIN_PRICE_THRESHOLD) {
                     errorLog("Low Price", hotelName, link.getLink());
                 } else {
@@ -123,10 +126,43 @@ public class ParseTour {
             hotelAddress = webDriver.findElement(By.xpath(selectorHotelAddress)).getText();
             tourStartDate = webDriver.findElement(By.xpath(selectorTourStartDate)).getText();
 
+            // search and add images to list
+            //todo сделать проверку, если прилетает fun
+            searchImage(webDriver);
+
         } catch (NoSuchElementException | NumberFormatException | TimeoutException e) {
             errorLog(e.getClass().getSimpleName(), hotelName, tourLink);
             webDriverQuit(webDriver);
         }
+    }
+
+    private void searchImage(WebDriver webDriver) {
+        // array with images
+        images = new ArrayList<>();
+
+        try {
+            List<WebElement> funsunImages = webDriver.findElements(By.cssSelector(".hotelInfoPhotos .box .main, .hotelInfoPhotos .box .photo"));
+            // Регулярное выражение для извлечения URL из style
+            Pattern urlPattern = Pattern.compile("url\\(\"(.*?)\"\\)");
+            // funsun
+            for (WebElement element : funsunImages) {
+                String styleAttribute = element.getAttribute("style");
+                if (styleAttribute != null) {
+                    Matcher matcher = urlPattern.matcher(styleAttribute);
+                    if (matcher.find()) {
+                        String imageUrl = matcher.group(1);
+                        images.add(imageUrl);
+                    }
+                }
+            }
+        } catch (NoSuchElementException e) {
+            errorLog(e.getClass().getSimpleName() + hotelName + " image search");
+        } finally {
+            if (images.isEmpty()) {
+                images.add("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZZV4k1vp1lymw9Q7x5a53uyW-quMhSZymZQ&s");
+            }
+        }
+
     }
 
     private void workWithDB(LinkEntity linkEntity) {
@@ -162,7 +198,7 @@ public class ParseTour {
     }
 
     private void createNewTour(LinkEntity linkEntity) {
-        TourEntity tour = new TourEntity(hotelName, priceInt, priceInt, "Без изменений", hotelAddress, tourStartDate, linkEntity, siteLogo);
+        TourEntity tour = new TourEntity(hotelName, priceInt, priceInt, "Без изменений", hotelAddress, tourStartDate, linkEntity, siteLogo, images);
         // Сохранение тура в базу данных
         tourRepository.save(tour);
     }

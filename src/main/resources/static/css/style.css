@@ -72,3 +72,22 @@
             text-align: center;
             padding: 10px 0;
         }
+/* Контейнер логотипа */
+.logo-container {
+    top: 10px; /* Отступ сверху */
+    left: 10px; /* Отступ слева */
+    position: absolute; /* Абсолютное позиционирование */
+    z-index: 10; /* Поверх других элементов */
+    background: rgba(255, 255, 255, 0.7); /* Полупрозрачный фон */
+    padding: 5px; /* Внутренний отступ */
+    border-radius: 8px; /* Скругление углов */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Лёгкая тень */
+}
+
+/* Логотип */
+.logo {
+    max-width: 40px; /* Ограничение ширины */
+    max-height: 40px; /* Ограничение высоты */
+    object-fit: contain; /* Сохранение пропорций */
+    border-radius: 4px; /* Скруглённые углы логотипа */
+}
