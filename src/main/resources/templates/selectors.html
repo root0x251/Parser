@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="bg-dark text-light">
+
+<div th:replace="~{fragments/nav}"></div>
+
+<div class="container mt-4">
+    <h1 class="text-center mb-4 text-light">Информация по селекторам XPath</h1>
+    <div class="row mt-4 gy-4">
+        <!-- Пример карточки для каждого селектора -->
+        <div th:each="selector : ${selectors}" class="col-md-4">
+            <div class="card shadow-sm" style="background-color: #6C757D; color: white; height: 100%;">
+                <!-- Заголовок карточки -->
+                <div class="card-header text-center bg-dark text-white">
+                    <h5 class="card-title" th:text="${selector.whichSite}"></h5>
+                </div>
+
+                <!-- Основное тело карточки -->
+                <div class="card-body">
+                    <!-- Блок с селекторами -->
+                    <h6 class="card-subtitle mb-3 text-muted">Селекторы для парсинга данных</h6>
+                    <ul class="list-group">
+                        <li class="list-group-item" style="background-color: #495057; color: white;"><strong>Наименование отеля:<br></strong> <span th:text="${selector.hotelSelector}"></span></li>
+                        <li class="list-group-item" style="background-color: #495057; color: white;"><strong>Стоимость:<br></strong> <span th:text="${selector.priceSelector}"></span></li>
+                        <li class="list-group-item" style="background-color: #495057; color: white;"><strong>Начало тура:<br></strong> <span th:text="${selector.tourStartDateSelector}"></span></li>
+                        <li class="list-group-item" style="background-color: #495057; color: white;"><strong>Адрес отеля:<br></strong> <span th:text="${selector.hotelAddressSelector}"></span></li>
+                        <li class="list-group-item" style="background-color: #495057; color: white;"><strong>Лого сайта:<br></strong> <span th:text="${selector.siteLogo}"></span></li>
+                    </ul>
+
+                    <!-- Кнопка изменения -->
+                    <div class="d-flex justify-content-center mt-4">
+                        <a th:href="@{/selector/edit/{id}(id=${selector.id})}" class="btn btn-outline-light btn-sm">
+                            Изменить </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div th:replace="~{fragments/footer}"></div>
+
+</body>
+</html>

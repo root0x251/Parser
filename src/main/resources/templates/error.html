@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tour Details</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body class="bg-dark text-light">
+
+<div th:replace="~{fragments/nav}"></div>
+
+<div class="container mt-5">
+  <h1 class="text-center mb-4">Log Error Details</h1>
+
+  <!-- Таблица для отображения информации -->
+  <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+    <tr>
+      <th scope="col">Описание ошибки</th>
+      <th scope="col">Дата</th>
+      <th scope="col">Название тура</th>
+      <th scope="col">Ссылка на тур</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Повторяем строки для каждого объекта LogErrorEntity -->
+    <tr th:each="logError : ${logErrors}">
+      <td th:text="${logError.description}"></td>
+      <td th:text="${logError.date}"></td>
+      <td th:text="${logError.tourName}"></td>
+      <td><a th:href="@{${logError.tourLink}}" target="_blank">тур</a></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<div th:replace="~{fragments/footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

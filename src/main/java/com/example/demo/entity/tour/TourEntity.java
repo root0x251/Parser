@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package com.example.demo.entity.tour;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -19,10 +19,21 @@ public class TourEntity {
     private int id;
     @Column(name = "hotel_name")
     private String hotelName;
+    @Column(name = "start_price")
+    private int tourStartPrice;
     @Column(name = "current_price")
     private int currentPrice;
     @Column(name = "price_change")
     private String priceChange;
+    @Column(name = "hotel_address", columnDefinition = "TEXT")
+    private String hotelAddress;
+    @Column(name = "tour_start_date", columnDefinition = "TEXT")
+    private String tourStartDate;
+    @Column(name = "logo", columnDefinition = "TEXT")
+    private String logo;
+    @ElementCollection
+    private List<String> images;
+
 
     @OneToOne
     @JoinColumn(name = "link_id", nullable = false)
@@ -32,11 +43,16 @@ public class TourEntity {
     @OneToMany(mappedBy = "tourEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<TourPriceHistoryEntity> priceHistory = new ArrayList<>();
 
-    public TourEntity(String hotelName, int currentPrice, String priceChange, LinkEntity link) {
+    public TourEntity(String hotelName, int tourStartPrice, int currentPrice, String priceChange, String hotelAddress, String tourStartDate, LinkEntity link, String logo, List<String> images) {
         this.hotelName = hotelName;
+        this.tourStartPrice = tourStartPrice;
         this.currentPrice = currentPrice;
         this.priceChange = priceChange;
+        this.hotelAddress = hotelAddress;
+        this.tourStartDate = tourStartDate;
         this.link = link;
+        this.logo = logo;
+        this.images = images;
     }
 
     @Override
@@ -52,10 +68,10 @@ public class TourEntity {
     }
 
     public String getPriceColor() {
-        if (priceChange.equals("цена увеличилась")) {
-            return "#ED1C24"; // увеличение цены
-        } else if (priceChange.equals("цена уменьшилась")) {
-            return "#007365"; // уменьшение цены
+        if (priceChange.equalsIgnoreCase("Цена увеличилась")) {
+            return "#ED1C24";
+        } else if (priceChange.equalsIgnoreCase("Цена уменьшилась")) {
+            return "#007365";
         } else {
             return "#7496a9"; // дефолт
         }

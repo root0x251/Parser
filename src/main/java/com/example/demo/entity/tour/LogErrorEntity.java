@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package com.example.demo.entity.tour;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -17,10 +17,18 @@ public class LogErrorEntity {
     private String date;
     @Column(name = "tour_name")
     private String tourName;
+    @Column(name = "tour_link", columnDefinition = "TEXT")
+    private String tourLink;
 
-    public LogErrorEntity(String description, String date, String tourName) {
+    public LogErrorEntity(String description, String date) {
+        this.description = description;
+        this.date = date;
+    }
+
+    public LogErrorEntity(String description, String date, String tourName, String tourLink) {
         this.description = description;
         this.date = date;
         this.tourName = tourName;
+        this.tourLink = tourLink;
     }
 }
