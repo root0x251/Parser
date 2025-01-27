@@ -26,7 +26,7 @@
                         <div class="mb-3">
                             <label for="whichSite" class="form-label">Сайт</label>
                             <input type="text" id="whichSite" name="whichSite" class="form-control"
-                                   th:value="${selector.whichSite}" type="url" required>
+                                   th:value="${selector.whichSite}" required>
                         </div>
 
                         <!-- hotelSelector -->
@@ -56,8 +56,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="siteLogo" class="form-label">Прямая ссылка на лого:<br></label>
-                            <input type="text" id="siteLogo" name="siteLogo" class="form-control"
-                                   th:value="${selector.siteLogo}" type="url">
+                            <input type="url" id="siteLogo" name="siteLogo" class="form-control"
+                                   th:value="${selector.siteLogo}">
                         </div>
 
                         <!-- сохранить -->

@@ -120,18 +120,20 @@ public class ParseTour {
 
         try {
             scrollDownAndUp(webDriver);
+            sleep(webDriver);
 
             hotelName = webDriver.findElement(By.xpath(selectorHotelName)).getText();
             priceInt = Integer.parseInt(webDriver.findElement(By.xpath(selectorHotelPrice)).getText().replaceAll("[^\\d.]", ""));
             hotelAddress = webDriver.findElement(By.xpath(selectorHotelAddress)).getText();
             tourStartDate = webDriver.findElement(By.xpath(selectorTourStartDate)).getText();
 
-            // search and add images to list
             //todo сделать проверку, если прилетает fun
+            // todo проверка на наличие фоток, нафиг еще раз обрабатывать это дело
+            // search and add images to list
             searchImage(webDriver);
 
         } catch (NoSuchElementException | NumberFormatException | TimeoutException e) {
-            errorLog(e.getClass().getSimpleName(), hotelName, tourLink);
+            https://fstravel.com/booking/0b6f1650-cb26-4b10-83cf-985c652e3878            errorLog(e.getClass().getSimpleName(), hotelName, tourLink);
             webDriverQuit(webDriver);
         }
     }
@@ -181,6 +183,7 @@ public class ParseTour {
     private void updateExistingTour(TourEntity existingTour) {
         int currentPriceFromDB = existingTour.getCurrentPrice();
 
+        // todo надо сделать еще одну страницу с турами, у которых будет много ошибок, веротно нет мест, из-за этого возникают ошибки, то есть надо сделать подсчет ошибок
         if (currentPriceFromDB != priceInt) {
             // Добавляем запись в историю изменений цены
             LocalDateTime now = LocalDateTime.now();
@@ -249,7 +252,7 @@ public class ParseTour {
 
     private static ChromeOptions getChromeOptions() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");                // Включаем headless режим
+//        options.addArguments("--headless");                // Включаем headless режим
         options.addArguments("--incognito");               // Включаем инкогнито
         options.addArguments("--disable-extensions");      // Отключаем расширения
         options.addArguments("--disable-gpu");             // Отключаем GPU
