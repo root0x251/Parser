@@ -70,7 +70,7 @@ public class ParseTour {
 
         WebDriverManager.chromedriver().setup();
 
-        for (LinkEntity link : linkRepository.findAll()) {
+        for (LinkEntity link : linkRepository.findNoArch()) {
             passesCounter++;
             WebDriver webDriver = null;
             System.out.println("======== New parser ========");
@@ -95,7 +95,7 @@ public class ParseTour {
                     workWithDB(link);
                 }
             } catch (Exception e) {
-                errorLog(e.getClass().getSimpleName() + " on Start parsing");
+                errorLog(e.getClass().getSimpleName(), "Start parsing", link.getLink());
             } finally {
                 if (webDriver != null) {
                     webDriverQuit(webDriver);
@@ -133,7 +133,7 @@ public class ParseTour {
             searchImage(webDriver);
 
         } catch (NoSuchElementException | NumberFormatException | TimeoutException e) {
-            https://fstravel.com/booking/0b6f1650-cb26-4b10-83cf-985c652e3878            errorLog(e.getClass().getSimpleName(), hotelName, tourLink);
+            errorLog(e.getClass().getSimpleName(), hotelName, tourLink);
             webDriverQuit(webDriver);
         }
     }
@@ -158,7 +158,7 @@ public class ParseTour {
                 }
             }
         } catch (NoSuchElementException e) {
-            errorLog(e.getClass().getSimpleName() + hotelName + " image search");
+            errorLog(e.getClass().getSimpleName(), "image search");
         } finally {
             if (images.isEmpty()) {
                 images.add("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZZV4k1vp1lymw9Q7x5a53uyW-quMhSZymZQ&s");
@@ -224,10 +224,10 @@ public class ParseTour {
         }
     }
 
-    public void errorLog(String errorCode) {
+    private void errorLog(String errorCode, String description) {
         errorCounter++;
         if (!logErrorRepo.existsByDate(currentDate())) {
-            LogErrorEntity logErrorEntity = new LogErrorEntity(errorCode, currentDate());
+            LogErrorEntity logErrorEntity = new LogErrorEntity(errorCode, currentDate(), description);
             logErrorRepo.save(logErrorEntity);
         }
     }
@@ -245,14 +245,14 @@ public class ParseTour {
         try {
             Thread.sleep(rand);
         } catch (InterruptedException e) {
-            errorLog(e.getClass().getSimpleName() + " on Timer");
+            errorLog(e.getClass().getSimpleName(), "Timer");
             webDriverQuit(webDriver);
         }
     }
 
     private static ChromeOptions getChromeOptions() {
         ChromeOptions options = new ChromeOptions();
-//        options.addArguments("--headless");                // Включаем headless режим
+        options.addArguments("--headless");                // Включаем headless режим
         options.addArguments("--incognito");               // Включаем инкогнито
         options.addArguments("--disable-extensions");      // Отключаем расширения
         options.addArguments("--disable-gpu");             // Отключаем GPU

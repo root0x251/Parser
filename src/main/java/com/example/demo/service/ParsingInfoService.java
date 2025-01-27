@@ -2,13 +2,14 @@ package com.example.demo.service;
 
 import com.example.demo.entity.tour.ParserInfoEntity;
 import com.example.demo.repository.tour.ParserInfoRepository;
-import org.springframework.boot.Banner;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+// Информация на главной странице, грубо говоря статистика. Тут у меня время запуска, время работы парсера и количество ошибок
 
 @Service
 public class ParsingInfoService {

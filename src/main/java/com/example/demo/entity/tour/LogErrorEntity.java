@@ -13,22 +13,24 @@ public class LogErrorEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String description;
+    @Column(name = "error_code", columnDefinition = "TEXT")
+    private String errorCode;
     private String date;
-    @Column(name = "tour_name")
-    private String tourName;
+    @Column(name = "description")
+    private String description;
     @Column(name = "tour_link", columnDefinition = "TEXT")
     private String tourLink;
 
-    public LogErrorEntity(String description, String date) {
-        this.description = description;
+    public LogErrorEntity(String errorCode, String date, String description) {
+        this.errorCode = errorCode;
         this.date = date;
+        this.description = description;
     }
 
-    public LogErrorEntity(String description, String date, String tourName, String tourLink) {
-        this.description = description;
+    public LogErrorEntity(String errorCode, String date, String description, String tourLink) {
+        this.errorCode = errorCode;
         this.date = date;
-        this.tourName = tourName;
+        this.description = description;
         this.tourLink = tourLink;
     }
 }
