@@ -29,6 +29,8 @@ public class TourEntity {
     private String hotelAddress;
     @Column(name = "tour_start_date", columnDefinition = "TEXT")
     private String tourStartDate;
+    @Column(name = "tour_night_count")
+    private int tourNightCount;
     @Column(name = "logo", columnDefinition = "TEXT")
     private String logo;
     @ElementCollection
@@ -43,13 +45,14 @@ public class TourEntity {
     @OneToMany(mappedBy = "tourEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<TourPriceHistoryEntity> priceHistory = new ArrayList<>();
 
-    public TourEntity(String hotelName, int tourStartPrice, int currentPrice, String priceChange, String hotelAddress, String tourStartDate, LinkEntity link, String logo, List<String> images) {
+    public TourEntity(String hotelName, int tourStartPrice, int currentPrice, String priceChange, String hotelAddress, String tourStartDate, int tourNightCount, LinkEntity link, String logo, List<String> images) {
         this.hotelName = hotelName;
         this.tourStartPrice = tourStartPrice;
         this.currentPrice = currentPrice;
         this.priceChange = priceChange;
         this.hotelAddress = hotelAddress;
         this.tourStartDate = tourStartDate;
+        this.tourNightCount = tourNightCount;
         this.link = link;
         this.logo = logo;
         this.images = images;

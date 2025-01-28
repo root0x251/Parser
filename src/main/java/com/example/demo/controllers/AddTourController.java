@@ -80,10 +80,7 @@ public class AddTourController {
         }
 
         // Создание и сохранение LinkEntity
-        LinkEntity link = new LinkEntity();
-        link.setSelectorEntity(selector);
-        link.setLink(url);
-        linkRepository.save(link);
+        linkRepository.save(new LinkEntity(url, false, 0, selector));
 
         return "redirect:/addLinkSelector"; // Перенаправление обратно на форму после сохранения
     }

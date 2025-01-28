@@ -2,6 +2,7 @@ package com.example.demo.job;
 
 import com.example.demo.entity.tour.*;
 import com.example.demo.repository.tour.*;
+import com.example.demo.service.TourDateFormatService;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
@@ -24,6 +25,7 @@ public class ParseTour {
 
     private final ChromeOptions options = getChromeOptions();
 
+
     // проверка, запущен ли парсер (нужен будет в будущем)
     public static AtomicBoolean isParserRunning = new AtomicBoolean(false);
 
@@ -36,10 +38,15 @@ public class ParseTour {
     private String hotelName = "Null";
     private int priceInt = 0;
     private String hotelAddress = "Null";
-    private String tourStartDate = "Null";
+
+    private Map<String, String> tourDate;
+
     private String siteLogo = "Null";
     // Carousel
     private List<String> images;
+
+    // работа с датами и количеством дней отпуска
+    private final TourDateFormatService tourDateFormatService;
 
     // информация для ParsingInfo, сбор метрик
     private long errorCounter = 0;
@@ -54,8 +61,9 @@ public class ParseTour {
     private final ParserInfoRepository parserInfoRepository;
 
     @Autowired
-    public ParseTour(LinkRepository linkRepository, TourRepository tourRepository, TourPriseHistoryRepository tourPriseHistoryRepository,
+    public ParseTour(TourDateFormatService tourDateFormatService, LinkRepository linkRepository, TourRepository tourRepository, TourPriseHistoryRepository tourPriseHistoryRepository,
                      LogErrorRepo logErrorRepo, ParserInfoRepository parserInfoRepository) {
+        this.tourDateFormatService = tourDateFormatService;
         this.linkRepository = linkRepository;
         this.tourRepository = tourRepository;
         this.tourPriseHistoryRepository = tourPriseHistoryRepository;
@@ -70,7 +78,7 @@ public class ParseTour {
 
         WebDriverManager.chromedriver().setup();
 
-        for (LinkEntity link : linkRepository.findAll()) {
+        for (LinkEntity link : linkRepository.searchByNonArchivedLink()) {
             passesCounter++;
             WebDriver webDriver = null;
             System.out.println("======== New parser ========");
@@ -103,7 +111,7 @@ public class ParseTour {
                 hotelName = "Null";
                 priceInt = 0;
                 hotelAddress = "Null";
-                tourStartDate = "Null";
+                tourDate.clear();
             }
         }
         parserInfoRepository.save(new ParserInfoEntity(startParsingTime, currentDate(), passesCounter, errorCounter));
@@ -125,7 +133,10 @@ public class ParseTour {
             hotelName = webDriver.findElement(By.xpath(selectorHotelName)).getText();
             priceInt = Integer.parseInt(webDriver.findElement(By.xpath(selectorHotelPrice)).getText().replaceAll("[^\\d.]", ""));
             hotelAddress = webDriver.findElement(By.xpath(selectorHotelAddress)).getText();
-            tourStartDate = webDriver.findElement(By.xpath(selectorTourStartDate)).getText();
+            String tourStartDate = webDriver.findElement(By.xpath(selectorTourStartDate)).getText();
+
+            // todo нужна проверка дат, если не соответствуют, пару раз, ссылку в архив
+            tourDate = tourDateFormatService.forFunSun(tourStartDate);
 
             //todo сделать проверку, если прилетает fun
             // todo проверка на наличие фоток, нафиг еще раз обрабатывать это дело
@@ -133,7 +144,7 @@ public class ParseTour {
             searchImage(webDriver);
 
         } catch (NoSuchElementException | NumberFormatException | TimeoutException e) {
-            https://fstravel.com/booking/0b6f1650-cb26-4b10-83cf-985c652e3878            errorLog(e.getClass().getSimpleName(), hotelName, tourLink);
+            errorLog(e.getClass().getSimpleName(), hotelName, tourLink);
             webDriverQuit(webDriver);
         }
     }
@@ -183,7 +194,7 @@ public class ParseTour {
     private void updateExistingTour(TourEntity existingTour) {
         int currentPriceFromDB = existingTour.getCurrentPrice();
 
-        // todo надо сделать еще одну страницу с турами, у которых будет много ошибок, веротно нет мест, из-за этого возникают ошибки, то есть надо сделать подсчет ошибок
+        // todo надо сделать еще одну страницу с турами, у которых будет много ошибок, веротно закончились места, из-за этого возникают ошибки, то есть надо сделать подсчет ошибок
         if (currentPriceFromDB != priceInt) {
             // Добавляем запись в историю изменений цены
             LocalDateTime now = LocalDateTime.now();
@@ -201,7 +212,7 @@ public class ParseTour {
     }
 
     private void createNewTour(LinkEntity linkEntity) {
-        TourEntity tour = new TourEntity(hotelName, priceInt, priceInt, "Без изменений", hotelAddress, tourStartDate, linkEntity, siteLogo, images);
+        TourEntity tour = new TourEntity(hotelName, priceInt, priceInt, "Без изменений", hotelAddress, tourDate.get("date"), Integer.parseInt(tourDate.get("countNight")), linkEntity, siteLogo, images);
         // Сохранение тура в базу данных
         tourRepository.save(tour);
     }
@@ -252,7 +263,7 @@ public class ParseTour {
 
     private static ChromeOptions getChromeOptions() {
         ChromeOptions options = new ChromeOptions();
-//        options.addArguments("--headless");                // Включаем headless режим
+        options.addArguments("--headless");                // Включаем headless режим
         options.addArguments("--incognito");               // Включаем инкогнито
         options.addArguments("--disable-extensions");      // Отключаем расширения
         options.addArguments("--disable-gpu");             // Отключаем GPU
