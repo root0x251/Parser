@@ -30,6 +30,7 @@ public class ParseTour {
 
     // константы для минимальной цены и таймера
     private static final int MIN_PRICE_THRESHOLD = 150000;
+    private static final int MAX_PRICE_THRESHOLD = 350000;
     private static final int MIN_SLEEP_MS = 8000;
     private static final int MAX_SLEEP_MS = 13000;
 
@@ -38,7 +39,7 @@ public class ParseTour {
     private int priceInt = 0;
     private String hotelAddress = "Null";
 
-    private Map<String, String> tourDate;
+    private Map<String, String> tourDate = new HashMap<>();
 
     private String siteLogo = "Null";
     // Carousel
@@ -93,8 +94,8 @@ public class ParseTour {
                         link.getSelectorEntity().getTourStartDateSelector(),
                         link.getSelectorEntity().getHotelAddressSelector());
 
-                if (priceInt < MIN_PRICE_THRESHOLD) {
-                    errorLog("Low Price", hotelName, link.getLink());
+                if (priceInt < MIN_PRICE_THRESHOLD || priceInt > MAX_PRICE_THRESHOLD) {
+                    errorLog("Price error, price - " + priceInt, hotelName, link.getLink());
                 } else {
                     workWithDB(link);
                 }
@@ -120,11 +121,10 @@ public class ParseTour {
 
     private void startParse(WebDriver webDriver, String selectorHotelName, String selectorHotelPrice, String tourLink,
                             String selectorTourStartDate, String selectorHotelAddress) {
-        sleep(webDriver);
+
+        scrollDownAndUp(webDriver);
 
         try {
-            scrollDownAndUp(webDriver);
-            sleep(webDriver);
 
             hotelName = webDriver.findElement(By.xpath(selectorHotelName)).getText();
             priceInt = Integer.parseInt(webDriver.findElement(By.xpath(selectorHotelPrice)).getText().replaceAll("[^\\d.]", ""));
@@ -138,6 +138,12 @@ public class ParseTour {
             // todo проверка на наличие фоток, нафиг еще раз обрабатывать это дело
             // search and add images to list
             searchImage(webDriver);
+            System.out.println(hotelName);
+            System.out.println(hotelAddress);
+            System.out.println(priceInt);
+            System.out.println(tourDate.get("date"));
+            System.out.println(tourDate.get("countNight"));
+
 
         } catch (NoSuchElementException | NumberFormatException | TimeoutException e) {
             errorLog(e.getClass().getSimpleName(), hotelName, tourLink);
@@ -217,6 +223,7 @@ public class ParseTour {
     public void scrollDownAndUp(WebDriver driver) {
         JavascriptExecutor js = (JavascriptExecutor) driver;
 
+        sleep(driver);
         // Прокрутка вниз на 500 пикселей
         js.executeScript("window.scrollBy(0, 1500)");
         // Небольшая пауза для видимости эффекта
@@ -270,7 +277,7 @@ public class ParseTour {
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
         // Меняем User-Agent на стандартный пользовательский
-        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.116 Safari/537.36");
+        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.160 Safari/537.36");
         // Отключение автоматической идентификации Selenium через переменные
         Map<String, Object> prefs = new HashMap<>();
         prefs.put("credentials_enable_service", false);
