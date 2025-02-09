@@ -96,6 +96,9 @@ public class ParseTour {
 
                 if (priceInt < MIN_PRICE_THRESHOLD || priceInt > MAX_PRICE_THRESHOLD) {
                     errorLog("Price error, price - " + priceInt, hotelName, link.getLink());
+                    if (priceInt <= 0) {
+                        updateExistingLink(link.getLink());
+                    }
                 } else {
                     workWithDB(link);
                 }
@@ -138,15 +141,10 @@ public class ParseTour {
             // todo проверка на наличие фоток, нафиг еще раз обрабатывать это дело
             // search and add images to list
             searchImage(webDriver);
-            System.out.println(hotelName);
-            System.out.println(hotelAddress);
-            System.out.println(priceInt);
-            System.out.println(tourDate.get("date"));
-            System.out.println(tourDate.get("countNight"));
-
 
         } catch (NoSuchElementException | NumberFormatException | TimeoutException e) {
             errorLog(e.getClass().getSimpleName(), hotelName, tourLink);
+            updateExistingLink(tourLink);
             webDriverQuit(webDriver);
         }
     }
@@ -205,8 +203,10 @@ public class ParseTour {
             TourPriceHistoryEntity priceHistory = new TourPriceHistoryEntity(now.format(formatter), currentPriceFromDB, existingTour);
             tourPriseHistoryRepository.save(priceHistory);
 
-            // Обновляем текущую цену в туре
+            // Обновляем текущую цену, стартовую дату и количество дней отдыха в туре
             existingTour.setCurrentPrice(priceInt);
+            existingTour.setTourStartDate(tourDate.get("date"));
+            existingTour.setTourNightCount(Integer.parseInt(tourDate.get("countNight")));
             existingTour.setPriceChange(currentPriceFromDB < priceInt ? "Цена увеличилась" : "Цена уменьшилась");
 
             tourRepository.save(existingTour);
@@ -217,6 +217,17 @@ public class ParseTour {
         TourEntity tour = new TourEntity(hotelName, priceInt, priceInt, "Без изменений", hotelAddress, tourDate.get("date"), Integer.parseInt(tourDate.get("countNight")), linkEntity, siteLogo, images);
         // Сохранение тура в базу данных
         tourRepository.save(tour);
+    }
+
+    private void updateExistingLink(String link) {
+        LinkEntity linkEntity = linkRepository.searchByURL(link);
+
+        linkEntity.setErrorCount(linkEntity.getErrorCount() + 1);
+
+        if (linkEntity.getErrorCount() >= 10) {
+            linkEntity.setArchive(true);
+        }
+        linkRepository.save(linkEntity);
     }
 
 
@@ -238,7 +249,7 @@ public class ParseTour {
         }
     }
 
-    public void errorLog(String errorCode) {
+    private void errorLog(String errorCode) {
         errorCounter++;
         if (!logErrorRepo.existsByDate(currentDate())) {
             LogErrorEntity logErrorEntity = new LogErrorEntity(errorCode, currentDate());
@@ -277,7 +288,8 @@ public class ParseTour {
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
         // Меняем User-Agent на стандартный пользовательский
-        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.160 Safari/537.36");
+//        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.160 Safari/537.36");
+        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.116 Safari/537.36");
         // Отключение автоматической идентификации Selenium через переменные
         Map<String, Object> prefs = new HashMap<>();
         prefs.put("credentials_enable_service", false);

@@ -9,7 +9,6 @@ import com.bortn.demo.repository.SelectorRepo;
 import com.bortn.demo.repository.TourPriseHistoryRepository;
 import com.bortn.demo.repository.TourRepository;
 import com.bortn.demo.service.ParsingInfoService;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,8 +48,20 @@ public class TourViewController {
         // Информация по парсингу для футера
         parsingInfoService.addParsingInfoService(model);
         // Вывод всех туров
-        model.addAttribute("tours", tourRepository.findAll(Sort.by(Sort.Direction.ASC, "currentPrice")));
+        model.addAttribute("tours", tourRepository.searchByArchivedLink(false));
         return "tour-list";
+    }
+
+    // архивировать тур
+    @GetMapping("tour/archive/{id}")
+    public String archiveTour(@PathVariable Long id) {
+        Optional<TourEntity> tourOptional = tourRepository.findById(id);
+        if (tourOptional.isPresent()) {
+            TourEntity tour = tourOptional.get();
+            tour.getLink().setArchive(true);  // Меняем статус "не отслеживать"
+            tourRepository.save(tour);  // Сохраняем изменения в базе данных
+        }
+        return "redirect:/tours";  // Перенаправление обратно на страницу списка туров
     }
 
     // подробнее

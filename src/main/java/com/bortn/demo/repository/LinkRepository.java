@@ -9,9 +9,12 @@ import java.util.List;
 
 @Repository
 public interface LinkRepository extends JpaRepository<LinkEntity, Long> {
+
     @Query("SELECT COUNT(*) > 0 FROM LinkEntity l WHERE l.link = :link")
     boolean existsByLink(String link);
 
+    @Query(value = "SELECT * FROM public.link l WHERE l.link = :link", nativeQuery = true)
+    LinkEntity searchByURL(String link);
 
     @Query(value = "SELECT * FROM public.link WHERE is_archive = false", nativeQuery = true)
     List<LinkEntity> searchByNonArchivedLink();
