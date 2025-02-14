@@ -97,7 +97,7 @@ public class ParseTour {
                 if (priceInt < MIN_PRICE_THRESHOLD || priceInt > MAX_PRICE_THRESHOLD) {
                     errorLog("Price error, price - " + priceInt, hotelName, link.getLink());
                     if (priceInt <= 0) {
-                        updateExistingLink(link.getLink());
+                        updateExistingLink(link.getLink(), true);
                     }
                 } else {
                     workWithDB(link);
@@ -144,7 +144,7 @@ public class ParseTour {
 
         } catch (NoSuchElementException | NumberFormatException | TimeoutException e) {
             errorLog(e.getClass().getSimpleName(), hotelName, tourLink);
-            updateExistingLink(tourLink);
+            updateExistingLink(tourLink, true);
             webDriverQuit(webDriver);
         }
     }
@@ -209,6 +209,8 @@ public class ParseTour {
             existingTour.setTourNightCount(Integer.parseInt(tourDate.get("countNight")));
             existingTour.setPriceChange(currentPriceFromDB < priceInt ? "Цена увеличилась" : "Цена уменьшилась");
 
+            updateExistingLink(existingTour.getLink().getLink(), false);
+
             tourRepository.save(existingTour);
         }
     }
@@ -219,10 +221,14 @@ public class ParseTour {
         tourRepository.save(tour);
     }
 
-    private void updateExistingLink(String link) {
+    private void updateExistingLink(String link, boolean isError) {
         LinkEntity linkEntity = linkRepository.searchByURL(link);
 
-        linkEntity.setErrorCount(linkEntity.getErrorCount() + 1);
+        if (isError) {
+            linkEntity.setErrorCount(linkEntity.getErrorCount() + 1);
+        } else {
+            linkEntity.setErrorCount(0);
+        }
 
         if (linkEntity.getErrorCount() >= 10) {
             linkEntity.setArchive(true);
@@ -235,11 +241,11 @@ public class ParseTour {
         JavascriptExecutor js = (JavascriptExecutor) driver;
 
         sleep(driver);
-        // Прокрутка вниз на 500 пикселей
+        // Прокрутка вниз на 1500 пикселей
         js.executeScript("window.scrollBy(0, 1500)");
         // Небольшая пауза для видимости эффекта
         sleep(driver);
-        // Прокрутка обратно вверх на 500 пикселей
+        // Прокрутка обратно вверх на 1500 пикселей
         js.executeScript("window.scrollBy(0, -1500)");
     }
 
