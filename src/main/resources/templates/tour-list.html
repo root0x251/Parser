@@ -54,7 +54,8 @@
                               th:style="'background-color: ' + ${tour.priceColor} + '; color: white;'"
                               th:text="${#numbers.formatDecimal(tour.currentPrice, 0, 'POINT', 0, 'POINT')} + ' ₽'"></span>
                     </div>
-                    <p class="card-text" th:text="${tour.tourStartDate}"></p>
+                    <p class="card-text" th:text="'Старт с ' + ${tour.tourStartDate}"></p>
+                    <p class="card-text" th:text="'На ' + ${tour.tourNightCount}+ ' ночей'"></p>
 
                     <div class="mt-auto d-flex justify-content-between">
                         <a th:href="@{/tour/{id}(id=${tour.id})}" class="btn btn-outline-light btn-sm" target="_blank">Подробнее</a>

@@ -21,6 +21,13 @@ public class ErrorViewController {
     }
 
     @GetMapping
+    public String listLastFifteenError(Model model) {
+        model.addAttribute("logErrors", logErrorRepo.findLastFifteenError());
+        parsingInfoService.addParsingInfoService(model);
+        return "error";
+    }
+
+    @GetMapping ("/all")
     public String listAllTours(Model model) {
         model.addAttribute("logErrors", logErrorRepo.findAll());
         // Инфо по парсингу

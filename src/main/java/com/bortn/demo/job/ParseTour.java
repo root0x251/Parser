@@ -31,8 +31,8 @@ public class ParseTour {
     // константы для минимальной цены и таймера
     private static final int MIN_PRICE_THRESHOLD = 150000;
     private static final int MAX_PRICE_THRESHOLD = 350000;
-    private static final int MIN_SLEEP_MS = 8000;
-    private static final int MAX_SLEEP_MS = 13000;
+    private static final int MIN_SLEEP_MS = 5000;
+    private static final int MAX_SLEEP_MS = 10000;
 
     // Инфо по туру
     private String hotelName = "Null";
@@ -126,9 +126,7 @@ public class ParseTour {
                             String selectorTourStartDate, String selectorHotelAddress) {
 
         scrollDownAndUp(webDriver);
-
         try {
-
             hotelName = webDriver.findElement(By.xpath(selectorHotelName)).getText();
             priceInt = Integer.parseInt(webDriver.findElement(By.xpath(selectorHotelPrice)).getText().replaceAll("[^\\d.]", ""));
             hotelAddress = webDriver.findElement(By.xpath(selectorHotelAddress)).getText();
@@ -136,11 +134,17 @@ public class ParseTour {
 
             // todo нужна проверка дат, если не соответствуют, пару раз, ссылку в архив
             tourDate = tourDateFormatService.forFunSun(tourStartDate);
+            System.out.println(hotelName);
+            System.out.println(priceInt);
+            System.out.println(tourDate.get("date"));
+            System.out.println(tourDate.get("countNight"));
 
             //todo сделать проверку, если прилетает fun
             // todo проверка на наличие фоток, нафиг еще раз обрабатывать это дело
             // search and add images to list
-            searchImage(webDriver);
+            if (!tourRepository.tourHasImages(tourLink)) {
+                searchImage(webDriver);
+            }
 
         } catch (NoSuchElementException | NumberFormatException | TimeoutException e) {
             errorLog(e.getClass().getSimpleName(), hotelName, tourLink);
@@ -243,10 +247,10 @@ public class ParseTour {
         sleep(driver);
         // Прокрутка вниз на 1500 пикселей
         js.executeScript("window.scrollBy(0, 1500)");
-        // Небольшая пауза для видимости эффекта
         sleep(driver);
         // Прокрутка обратно вверх на 1500 пикселей
-        js.executeScript("window.scrollBy(0, -1500)");
+        js.executeScript("window.scrollBy(0, -1000)");
+        sleep(driver);
     }
 
     private void webDriverQuit(WebDriver webDriver) {
@@ -257,6 +261,7 @@ public class ParseTour {
 
     private void errorLog(String errorCode) {
         errorCounter++;
+        System.out.println(errorCode);
         if (!logErrorRepo.existsByDate(currentDate())) {
             LogErrorEntity logErrorEntity = new LogErrorEntity(errorCode, currentDate());
             logErrorRepo.save(logErrorEntity);
@@ -265,6 +270,8 @@ public class ParseTour {
 
     private void errorLog(String errorCode, String hotelName, String tourLink) {
         errorCounter++;
+        System.out.println(errorCode);
+        System.out.println(hotelName);
         if (!logErrorRepo.existsByDate(currentDate())) {
             LogErrorEntity logErrorEntity = new LogErrorEntity(errorCode, currentDate(), hotelName, tourLink);
             logErrorRepo.save(logErrorEntity);
@@ -272,7 +279,9 @@ public class ParseTour {
     }
 
     private void sleep(WebDriver webDriver) {
-        int rand = new Random().nextInt(MIN_SLEEP_MS) + MAX_SLEEP_MS;
+//        int rand = new Random().nextInt(MIN_SLEEP_MS) + MAX_SLEEP_MS;
+        int rand = new Random().nextInt(MAX_SLEEP_MS - MIN_SLEEP_MS + 1) + MIN_SLEEP_MS;
+        System.out.println("sleep " + rand);
         try {
             Thread.sleep(rand);
         } catch (InterruptedException e) {

@@ -17,5 +17,8 @@ public interface LogErrorRepo extends JpaRepository<LogErrorEntity, Long> {
     @Query(value = "SELECT * FROM error_core_log ORDER BY tour_name ASC", nativeQuery = true)
     List<LogErrorEntity> findAllSortedByTourName();
 
+    @Query(value = "SELECT * FROM public.error_core_log ORDER BY id DESC LIMIT 15", nativeQuery = true)
+    List<LogErrorEntity> findLastFifteenError();
+
 }
 
