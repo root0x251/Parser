@@ -132,15 +132,11 @@ public class ParseTour {
             hotelAddress = webDriver.findElement(By.xpath(selectorHotelAddress)).getText();
             String tourStartDate = webDriver.findElement(By.xpath(selectorTourStartDate)).getText();
 
-            // todo нужна проверка дат, если не соответствуют, пару раз, ссылку в архив
             tourDate = tourDateFormatService.forFunSun(tourStartDate);
             System.out.println(hotelName);
             System.out.println(priceInt);
             System.out.println(tourDate.get("date"));
             System.out.println(tourDate.get("countNight"));
-
-            //todo сделать проверку, если прилетает fun
-            // todo проверка на наличие фоток, нафиг еще раз обрабатывать это дело
             // search and add images to list
             if (!tourRepository.tourHasImages(tourLink)) {
                 searchImage(webDriver);
@@ -198,7 +194,6 @@ public class ParseTour {
     private void updateExistingTour(TourEntity existingTour) {
         int currentPriceFromDB = existingTour.getCurrentPrice();
 
-        // todo надо сделать еще одну страницу с турами, у которых будет много ошибок, веротно закончились места, из-за этого возникают ошибки, то есть надо сделать подсчет ошибок
         if (currentPriceFromDB != priceInt) {
             // Добавляем запись в историю изменений цены
             LocalDateTime now = LocalDateTime.now();

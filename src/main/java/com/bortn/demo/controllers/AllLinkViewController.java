@@ -46,15 +46,6 @@ public class AllLinkViewController {
             }
             linkRepository.delete(link.get());
         }
-
-//        Optional<TourEntity> tourEntity = tourRepository.searchByLinkId(id);
-//        if (tourEntity.isEmpty()) {
-//            return "redirect:/tours";
-//        } else {
-//            tourRepository.delete(tourEntity.get());
-//            tourPriseHistoryRepository.deleteAll(tourEntity.get().getPriceHistory());
-//        }
-
         return "redirect:/allLink"; // возврат на главную страницу
     }
 
